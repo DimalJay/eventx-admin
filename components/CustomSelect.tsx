@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface Option {
   value: string;
@@ -44,38 +43,32 @@ export default function CustomSelect({ value, onChange, options, placeholder = "
         />
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 4, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
-            className="absolute left-0 right-0 mt-1 bg-white border border-zinc-200/80 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto py-1"
-          >
-            {options.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(opt.value);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full text-left px-3.5 py-2 text-sm transition-colors cursor-pointer ${
-                    isSelected 
-                      ? "bg-zinc-950 text-white font-medium" 
-                      : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div
+          className="absolute left-0 right-0 mt-1 bg-white border border-zinc-200/80 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto py-1"
+        >
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-3.5 py-2 text-sm transition-colors cursor-pointer ${
+                  isSelected 
+                    ? "bg-zinc-950 text-white font-medium" 
+                    : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

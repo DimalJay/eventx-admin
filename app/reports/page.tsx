@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, Filter, ShieldAlert } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Filter } from "lucide-react";
 
 const REPORTS = [
   { id: "R001", reporter: "user@uni.edu", type: "Harassment", status: "New", priority: "High", date: "2026-07-16" },
@@ -20,9 +19,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div 
         className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs overflow-hidden"
       >
         <div className="p-4 border-b border-zinc-200/60 flex flex-col sm:flex-row gap-4 justify-between bg-zinc-50/50">
@@ -80,7 +77,7 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

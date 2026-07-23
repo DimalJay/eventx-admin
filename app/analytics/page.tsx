@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Download, Calendar as CalendarIcon, TrendingUp, Users, Ticket } from "lucide-react";
-import { motion } from "framer-motion";
+import { Download, Users, Ticket } from "lucide-react";
 
 export default function AnalyticsPage() {
   return (
@@ -20,9 +19,7 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div 
           className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6"
         >
           <div className="flex items-center justify-between mb-6">
@@ -39,12 +36,9 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div 
           className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6"
         >
           <div className="flex items-center justify-between mb-6">
@@ -61,13 +55,10 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+      <div 
         className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6"
       >
         <h2 className="text-lg font-semibold text-zinc-950 mb-4">Custom Report Generation</h2>
@@ -94,7 +85,7 @@ export default function AnalyticsPage() {
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

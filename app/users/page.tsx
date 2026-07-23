@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Edit, Ban, Loader2, X, User as UserIcon, Phone, Calendar, Shield, Globe, Award, CheckCircle2, AlertCircle } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUsersRequest, getUserRegistrationsRequest } from "@/service/userService";
 import { getPublicEventsRequest } from "@/service/eventService";
@@ -247,24 +246,18 @@ export default function UserManagementPage() {
         )}
       </TableCard>
 
-      {/* User Details Modal */}
-      <AnimatePresence>
-        {isDetailsModalOpen && selectedUser && (
-          <>
-            {/* Backdrop */}
+      {isDetailsModalOpen && selectedUser && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setIsDetailsModalOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+          >
+            {/* Modal Card */}
             <div
-              onClick={() => setIsDetailsModalOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl border border-zinc-200/80 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[85vh]"
             >
-              {/* Modal Card */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: "spring", duration: 0.5 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-3xl border border-zinc-200/80 shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[85vh]"
-              >
                 {/* Modal Header */}
                 <div className="p-6 pb-4 border-b border-zinc-100 flex items-start justify-between bg-zinc-50/50">
                   <div className="flex items-center gap-4">
@@ -446,12 +439,10 @@ export default function UserManagementPage() {
                     </div>
                   )}
                 </div>
-              </motion.div>
             </div>
-          </>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-

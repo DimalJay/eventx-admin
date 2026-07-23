@@ -2,7 +2,6 @@
 
 import { Filter, X } from "lucide-react";
 import { Search } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface TableToolbarProps {
   searchQuery: string;
@@ -57,43 +56,38 @@ export default function TableToolbar({
           )}
         </button>
 
-        <AnimatePresence>
-          {isFilterOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={onFilterClose} />
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-zinc-200/80 shadow-xl p-4 z-20 space-y-4"
-              >
-                {/* Popover Header */}
-                <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-                  <span className="font-semibold text-zinc-950 text-sm">Filters & Sorting</span>
-                  <div className="flex items-center gap-2">
-                    {hasActiveFilters && (
-                      <button
-                        onClick={onClearFilters}
-                        className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 font-bold uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors cursor-pointer"
-                      >
-                        Clear
-                      </button>
-                    )}
+        {isFilterOpen && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={onFilterClose} />
+            <div
+              className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-zinc-200/80 shadow-xl p-4 z-20 space-y-4"
+            >
+              {/* Popover Header */}
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+                <span className="font-semibold text-zinc-950 text-sm">Filters & Sorting</span>
+                <div className="flex items-center gap-2">
+                  {hasActiveFilters && (
                     <button
-                      onClick={onFilterClose}
-                      className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors cursor-pointer"
+                      onClick={onClearFilters}
+                      className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 font-bold uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors cursor-pointer"
                     >
-                      <X size={14} />
+                      Clear
                     </button>
-                  </div>
+                  )}
+                  <button
+                    onClick={onFilterClose}
+                    className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
+              </div>
 
-                {/* Page-specific filter content */}
-                <div className="space-y-3">{filterContent}</div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+              {/* Page-specific filter content */}
+              <div className="space-y-3">{filterContent}</div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -10,7 +10,6 @@ import {
   EyeOff, 
   Loader2 
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 type TabType = "profile" | "security";
 
@@ -76,19 +75,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Global Save Indicator */}
-        <AnimatePresence>
-          {successMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider"
-            >
-              <Check size={14} />
-              {successMessage}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {successMessage && (
+          <div
+            className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider"
+          >
+            <Check size={14} />
+            {successMessage}
+          </div>
+        )}
       </div>
 
       {/* Horizontal Tabs Navigation */}
@@ -109,10 +103,8 @@ export default function SettingsPage() {
               <Icon size={16} className={isActive ? "text-black" : "text-zinc-400"} />
               {tab.label}
               {isActive && (
-                <motion.div 
-                  layoutId="activeTabBorder"
+                <div 
                   className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-950"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}
             </button>
@@ -135,15 +127,9 @@ export default function SettingsPage() {
 
           {/* Inner Content Area */}
           <div className="p-6 flex-1">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-6"
-              >
+            <div
+              className="space-y-6"
+            >
                 {/* --- PROFILE TAB --- */}
                 {activeTab === "profile" && (
                   <div className="space-y-6">
@@ -281,8 +267,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 )}
-              </motion.div>
-            </AnimatePresence>
+            </div>
           </div>
 
           {/* Footer Form Action Panel */}
