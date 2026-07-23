@@ -5,6 +5,7 @@ import { Search, Filter, Edit, Ban, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUsersRequest } from "@/service/userService";
+import CustomSelect from "@/components/CustomSelect";
 
 export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -144,49 +145,50 @@ export default function UserManagementPage() {
                   >
                     <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
                       <span className="font-semibold text-zinc-950 text-sm">Filters & Sorting</span>
-                      <button 
-                        onClick={() => setIsFilterOpen(false)}
-                        className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors"
-                      >
-                        <X size={14} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {hasActiveFilters && (
+                          <button
+                            onClick={clearFilters}
+                            className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 font-bold uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors cursor-pointer"
+                          >
+                            Clear
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => setIsFilterOpen(false)}
+                          className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors cursor-pointer"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-3">
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Sort by Joined Date</label>
-                        <select
+                        <CustomSelect
                           value={sortBy}
-                          onChange={(e) => handleSortByChange(e.target.value)}
-                          className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-zinc-400 transition-colors"
-                        >
-                          <option value="desc">Newest First</option>
-                          <option value="asc">Oldest First</option>
-                        </select>
+                          onChange={handleSortByChange}
+                          options={[
+                            { value: "desc", label: "Newest First" },
+                            { value: "asc", label: "Oldest First" },
+                          ]}
+                        />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account Status</label>
-                        <select
+                        <CustomSelect
                           value={statusFilter}
-                          onChange={(e) => handleStatusFilterChange(e.target.value)}
-                          className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-zinc-400 transition-colors"
-                        >
-                          <option value="all">All Statuses</option>
-                          <option value="active">Active</option>
-                          <option value="suspended">Suspended</option>
-                        </select>
+                          onChange={handleStatusFilterChange}
+                          options={[
+                            { value: "all", label: "All Statuses" },
+                            { value: "active", label: "Active" },
+                            { value: "suspended", label: "Suspended" },
+                          ]}
+                        />
                       </div>
                     </div>
-
-                    {hasActiveFilters && (
-                      <button
-                        onClick={clearFilters}
-                        className="w-full py-2 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors text-xs font-semibold rounded-xl uppercase tracking-wider text-center"
-                      >
-                        Clear Filters
-                      </button>
-                    )}
                   </motion.div>
                 </>
               )}
