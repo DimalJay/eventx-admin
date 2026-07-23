@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, Eye, XCircle, Loader2, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Eye, XCircle, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getPublicEventsRequest } from "@/service/eventService";
+import { getPublicEventsRequest, getEventRegistrationsRequest } from "@/service/eventService";
 import { getAllUsersRequest } from "@/service/userService";
 import CustomSelect from "@/components/CustomSelect";
+import { getImageUrl } from "@/lib/utils";
+import TableCard from "@/components/admin/TableCard";
+import TableToolbar from "@/components/admin/TableToolbar";
+import TablePagination from "@/components/admin/TablePagination";
+import EventDetailsModal from "@/components/admin/EventDetailsModal";
 
 export default function EventManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,6 +20,10 @@ export default function EventManagementPage() {
   const [capacityFilter, setCapacityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("info");
 
   const ITEMS_PER_PAGE = 10;
 
@@ -31,6 +39,20 @@ export default function EventManagementPage() {
 
   const rawEvents = eventsData?.data || [];
   const users = usersData?.data || [];
+
+  const { data: eventRegsData, isLoading: isEventRegsLoading } = useQuery({
+    queryKey: ["event-registrations", selectedEvent?.id],
+    queryFn: () => getEventRegistrationsRequest(selectedEvent.id),
+    enabled: !!selectedEvent,
+  });
+
+  const eventAttendees = eventRegsData?.data || [];
+
+  const handleRowClick = (event: any) => {
+    setSelectedEvent(event);
+    setIsDetailsModalOpen(true);
+    setActiveTab("info");
+  };
 
   // Helper to format date
   const formatDate = (dateString: string) => {
@@ -169,141 +191,79 @@ export default function EventManagementPage() {
         </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs overflow-hidden"
-      >
-        <div className="p-4 border-b border-zinc-200/60 flex flex-col sm:flex-row gap-4 justify-between bg-zinc-50/50">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search events..." 
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:border-zinc-400 transition-colors"
-            />
-          </div>
-          <div className="relative">
-            <button 
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                hasActiveFilters 
-                  ? "bg-black text-white border-black" 
-                  : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
-              }`}
-            >
-              <Filter size={14} /> Filter
-              {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              )}
-            </button>
-
-            {/* Filter Menu Popover */}
-            <AnimatePresence>
-              {isFilterOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setIsFilterOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-zinc-200/80 shadow-xl p-4 z-20 space-y-4"
-                  >
-                    <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-                      <span className="font-semibold text-zinc-950 text-sm">Filters & Sorting</span>
-                      <div className="flex items-center gap-2">
-                        {hasActiveFilters && (
-                          <button
-                            onClick={clearFilters}
-                            className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 font-bold uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors cursor-pointer"
-                          >
-                            Clear
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => setIsFilterOpen(false)}
-                          className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors cursor-pointer"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Start Date</label>
-                        <CustomSelect
-                          value={timeframeFilter}
-                          onChange={handleTimeframeFilterChange}
-                          options={[
-                            { value: "all", label: "Any Time" },
-                            { value: "today", label: "Today" },
-                            { value: "this_week", label: "This Week" },
-                            { value: "this_month", label: "This Month" },
-                            { value: "custom_month", label: "Specific Month" },
-                          ]}
-                        />
-
-                        {/* Month selection grid */}
-                        {timeframeFilter === "custom_month" && (
-                          <div className="grid grid-cols-4 gap-1.5 mt-2 p-1 bg-zinc-50 rounded-xl border border-zinc-200/50">
-                            {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month, idx) => (
-                              <button
-                                key={month}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedMonth(idx);
-                                  setCurrentPage(1);
-                                }}
-                                className={`text-[10px] font-semibold py-1 rounded-lg transition-colors cursor-pointer text-center ${
-                                  selectedMonth === idx
-                                    ? "bg-zinc-950 text-white"
-                                    : "bg-white text-zinc-600 border border-zinc-200/60 hover:bg-zinc-50"
-                                }`}
-                              >
-                                {month}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Capacity</label>
-                        <CustomSelect
-                          value={capacityFilter}
-                          onChange={handleCapacityFilterChange}
-                          options={[
-                            { value: "all", label: "Any Capacity" },
-                            { value: "under_100", label: "Less than 100" },
-                            { value: "100_plus", label: "100+" },
-                            { value: "500_plus", label: "500+" },
-                          ]}
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Event Status</label>
-                        <CustomSelect
-                          value={statusFilter}
-                          onChange={handleStatusFilterChange}
-                          options={[
-                            { value: "all", label: "All Statuses" },
-                            { value: "scheduled", label: "Scheduled" },
-                            { value: "ongoing", label: "Ongoing" },
-                            { value: "completed", label: "Completed" },
-                          ]}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+      <TableCard>
+        <TableToolbar
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          searchPlaceholder="Search events..."
+          isFilterOpen={isFilterOpen}
+          onFilterToggle={() => setIsFilterOpen(!isFilterOpen)}
+          onFilterClose={() => setIsFilterOpen(false)}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+          filterContent={
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Start Date</label>
+                <CustomSelect
+                  value={timeframeFilter}
+                  onChange={handleTimeframeFilterChange}
+                  options={[
+                    { value: "all", label: "Any Time" },
+                    { value: "today", label: "Today" },
+                    { value: "this_week", label: "This Week" },
+                    { value: "this_month", label: "This Month" },
+                    { value: "custom_month", label: "Specific Month" },
+                  ]}
+                />
+                {timeframeFilter === "custom_month" && (
+                  <div className="grid grid-cols-4 gap-1.5 mt-2 p-1 bg-zinc-50 rounded-xl border border-zinc-200/50">
+                    {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month, idx) => (
+                      <button
+                        key={month}
+                        type="button"
+                        onClick={() => { setSelectedMonth(idx); setCurrentPage(1); }}
+                        className={`text-[10px] font-semibold py-1 rounded-lg transition-colors cursor-pointer text-center ${
+                          selectedMonth === idx
+                            ? "bg-zinc-950 text-white"
+                            : "bg-white text-zinc-600 border border-zinc-200/60 hover:bg-zinc-50"
+                        }`}
+                      >
+                        {month}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Capacity</label>
+                <CustomSelect
+                  value={capacityFilter}
+                  onChange={handleCapacityFilterChange}
+                  options={[
+                    { value: "all", label: "Any Capacity" },
+                    { value: "under_100", label: "Less than 100" },
+                    { value: "100_plus", label: "100+" },
+                    { value: "500_plus", label: "500+" },
+                  ]}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Event Status</label>
+                <CustomSelect
+                  value={statusFilter}
+                  onChange={handleStatusFilterChange}
+                  options={[
+                    { value: "all", label: "All Statuses" },
+                    { value: "scheduled", label: "Scheduled" },
+                    { value: "ongoing", label: "Ongoing" },
+                    { value: "completed", label: "Completed" },
+                  ]}
+                />
+              </div>
+            </>
+          }
+        />
 
         {isEventsLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-zinc-500">
@@ -339,7 +299,12 @@ export default function EventManagementPage() {
                     const status = getEventStatus(event);
                     return (
                       <tr key={event.id} className="hover:bg-zinc-50/50 transition-colors group">
-                        <td className="px-6 py-4 font-medium text-zinc-900">{event.title}</td>
+                        <td 
+                          onClick={() => handleRowClick(event)}
+                          className="px-6 py-4 font-semibold text-zinc-900 cursor-pointer hover:text-black hover:underline transition-all"
+                        >
+                          {event.title}
+                        </td>
                         <td className="px-6 py-4 text-zinc-500">{getOrganizerName(event.organizerId)}</td>
                         <td className="px-6 py-4 text-zinc-500">{formatDate(event.startDate)}</td>
                         <td className="px-6 py-4 text-zinc-500">{event.capacity > 0 ? `0 / ${event.capacity}` : "Unlimited"}</td>
@@ -365,45 +330,30 @@ export default function EventManagementPage() {
               </table>
             </div>
 
-            <div className="p-4 border-t border-zinc-200/60 flex items-center justify-between text-sm text-zinc-500 bg-zinc-50/50">
-              <span>
-                Showing {filteredEvents.length === 0 ? 0 : startIndex + 1} to{" "}
-                {Math.min(startIndex + ITEMS_PER_PAGE, filteredEvents.length)} of{" "}
-                {filteredEvents.length} entries
-              </span>
-              <div className="flex gap-1">
-                <button 
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white disabled:opacity-50 disabled:hover:bg-white transition-colors cursor-pointer"
-                >
-                  Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
-                  <button 
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 border border-zinc-200 rounded-lg transition-colors cursor-pointer ${
-                      currentPage === page 
-                        ? "bg-zinc-950 text-white" 
-                        : "bg-white hover:bg-zinc-100 text-zinc-700"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button 
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white disabled:opacity-50 disabled:hover:bg-white transition-colors cursor-pointer"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredEvents.length}
+              itemsPerPage={ITEMS_PER_PAGE}
+              startIndex={startIndex}
+              onPageChange={setCurrentPage}
+            />
           </>
         )}
-      </motion.div>
+      </TableCard>
+
+      <EventDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        selectedEvent={selectedEvent}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        eventStatus={selectedEvent ? getEventStatus(selectedEvent) : ""}
+        organizerName={selectedEvent ? getOrganizerName(selectedEvent.organizerId) : ""}
+        formatDate={formatDate}
+        attendees={eventAttendees}
+        isAttendeesLoading={isEventRegsLoading}
+      />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion, Variants } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStatsRequest } from "@/service/dashboardService";
 import {
@@ -12,19 +11,6 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from "lucide-react";
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
 
 export default function AdminDashboard() {
   const { data: statsData, isLoading } = useQuery({
@@ -85,16 +71,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, index) => (
-          <motion.div
+          <div
             key={index}
-            variants={itemVariants}
             className="bg-white/80 backdrop-blur-md rounded-3xl p-6 border border-zinc-200/60 shadow-xs hover:shadow-md transition relative overflow-hidden group"
           >
             <div className="flex items-start justify-between">
@@ -111,18 +91,13 @@ export default function AdminDashboard() {
               <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider">{stat.title}</p>
               <h3 className="text-3xl font-semibold text-zinc-950 mt-1 tracking-tight">{stat.value}</h3>
             </div>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content Area (Chart Placeholder) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6"
-        >
+        <div className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-zinc-950">Revenue & Registrations</h2>
             <select className="bg-zinc-50 border border-zinc-200 text-zinc-700 text-sm rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-zinc-950/20">
@@ -150,26 +125,19 @@ export default function AdminDashboard() {
                   className="w-full bg-zinc-100 rounded-t-lg relative overflow-hidden group-hover:bg-zinc-200 transition-colors"
                   style={{ height: `${Math.max(day.percentage, 5)}%` }} // Ensure at least 5% height so it is slightly visible even if 0
                 >
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${day.percentage}%` }}
-                    transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
+                  <div
                     className="absolute bottom-0 w-full bg-zinc-950 rounded-t-lg"
+                    style={{ height: `${day.percentage}%` }}
                   />
                 </div>
                 <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{day.label}</span>
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Recent Activity Feed */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6 flex flex-col"
-        >
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-zinc-950">Recent Activity</h2>
             <button className="text-xs text-zinc-900 font-semibold uppercase tracking-wider hover:text-zinc-600 transition">View All</button>
@@ -197,7 +165,7 @@ export default function AdminDashboard() {
               })
             )}
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

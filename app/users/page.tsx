@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, Edit, Ban, Loader2, X, User as UserIcon, Mail, Phone, Calendar, Shield, Globe, Award, CheckCircle2, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Edit, Ban, Loader2, X, User as UserIcon, Phone, Calendar, Shield, Globe, Award, CheckCircle2, AlertCircle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUsersRequest, getUserRegistrationsRequest } from "@/service/userService";
 import { getPublicEventsRequest } from "@/service/eventService";
 import CustomSelect from "@/components/CustomSelect";
+import { getImageUrl } from "@/lib/utils";
+import TableCard from "@/components/admin/TableCard";
+import TableToolbar from "@/components/admin/TableToolbar";
+import TablePagination from "@/components/admin/TablePagination";
 
 export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,100 +124,44 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs overflow-hidden"
-      >
-        <div className="p-4 border-b border-zinc-200/60 flex flex-col sm:flex-row gap-4 justify-between bg-zinc-50/50">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search by name or email..." 
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:border-zinc-400 transition-colors"
-            />
-          </div>
-          <div className="relative">
-            <button 
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                hasActiveFilters 
-                  ? "bg-black text-white border-black" 
-                  : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
-              }`}
-            >
-              <Filter size={14} /> Filter
-              {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              )}
-            </button>
-
-            {/* Filter Menu Popover */}
-            <AnimatePresence>
-              {isFilterOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setIsFilterOpen(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-zinc-200/80 shadow-xl p-4 z-20 space-y-4"
-                  >
-                    <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-                      <span className="font-semibold text-zinc-950 text-sm">Filters & Sorting</span>
-                      <div className="flex items-center gap-2">
-                        {hasActiveFilters && (
-                          <button
-                            onClick={clearFilters}
-                            className="text-[10px] bg-red-50 hover:bg-red-100 text-red-600 font-bold uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors cursor-pointer"
-                          >
-                            Clear
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => setIsFilterOpen(false)}
-                          className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors cursor-pointer"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Sort by Joined Date</label>
-                        <CustomSelect
-                          value={sortBy}
-                          onChange={handleSortByChange}
-                          options={[
-                            { value: "desc", label: "Newest First" },
-                            { value: "asc", label: "Oldest First" },
-                          ]}
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account Status</label>
-                        <CustomSelect
-                          value={statusFilter}
-                          onChange={handleStatusFilterChange}
-                          options={[
-                            { value: "all", label: "All Statuses" },
-                            { value: "active", label: "Active" },
-                            { value: "suspended", label: "Suspended" },
-                          ]}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+      <TableCard>
+        <TableToolbar
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          searchPlaceholder="Search by name or email..."
+          isFilterOpen={isFilterOpen}
+          onFilterToggle={() => setIsFilterOpen(!isFilterOpen)}
+          onFilterClose={() => setIsFilterOpen(false)}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearFilters}
+          filterContent={
+            <>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Sort by Joined Date</label>
+                <CustomSelect
+                  value={sortBy}
+                  onChange={handleSortByChange}
+                  options={[
+                    { value: "desc", label: "Newest First" },
+                    { value: "asc", label: "Oldest First" },
+                  ]}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account Status</label>
+                <CustomSelect
+                  value={statusFilter}
+                  onChange={handleStatusFilterChange}
+                  options={[
+                    { value: "all", label: "All Statuses" },
+                    { value: "active", label: "Active" },
+                    { value: "suspended", label: "Suspended" },
+                  ]}
+                />
+              </div>
+            </>
+          }
+        />
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-zinc-500">
@@ -287,45 +235,17 @@ export default function UserManagementPage() {
               </table>
             </div>
             
-            <div className="p-4 border-t border-zinc-200/60 flex items-center justify-between text-sm text-zinc-500 bg-zinc-50/50">
-              <span>
-                Showing {filteredUsers.length === 0 ? 0 : startIndex + 1} to{" "}
-                {Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length)} of{" "}
-                {filteredUsers.length} entries
-              </span>
-              <div className="flex gap-1">
-                <button 
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white disabled:opacity-50 disabled:hover:bg-white transition-colors cursor-pointer"
-                >
-                  Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
-                  <button 
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 border border-zinc-200 rounded-lg transition-colors cursor-pointer ${
-                      currentPage === page 
-                        ? "bg-zinc-950 text-white" 
-                        : "bg-white hover:bg-zinc-100 text-zinc-700"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button 
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white disabled:opacity-50 disabled:hover:bg-white transition-colors cursor-pointer"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredUsers.length}
+              itemsPerPage={ITEMS_PER_PAGE}
+              startIndex={startIndex}
+              onPageChange={setCurrentPage}
+            />
           </>
         )}
-      </motion.div>
+      </TableCard>
 
       {/* User Details Modal */}
       <AnimatePresence>
@@ -350,7 +270,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700 font-bold text-lg">
                       {selectedUser.profilePicture ? (
-                        <img src={selectedUser.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
+                        <img src={getImageUrl(selectedUser.profilePicture)} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
                         `${selectedUser.firstName[0]}${selectedUser.lastName[0]}`.toUpperCase()
                       )}

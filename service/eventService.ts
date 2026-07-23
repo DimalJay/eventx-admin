@@ -29,3 +29,9 @@ export const getPublicEventsRequest = async (): Promise<EventResponse> => {
     method: "GET",
   });
 };
+
+export const getEventRegistrationsRequest = async (eventId: number): Promise<any> => {
+  return request(`/event/registrations?eventId=${eventId}`, {
+    method: "GET",
+  });
+};
