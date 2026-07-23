@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, Edit, Ban, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Filter, Edit, Ban, Loader2, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { getAllUsersRequest } from "@/service/userService";
 
 export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("desc");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
@@ -16,13 +19,23 @@ export default function UserManagementPage() {
 
   const rawUsers = data?.data || [];
 
-  // Filter users based on search query
-  const filteredUsers = rawUsers.filter((user) => {
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    const email = user.email.toLowerCase();
-    const query = searchQuery.toLowerCase();
-    return fullName.includes(query) || email.includes(query);
-  });
+  // Filter users based on search query and status filter, then sort by Joined Date
+  const filteredUsers = rawUsers
+    .filter((user) => {
+      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+      const email = user.email.toLowerCase();
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = fullName.includes(query) || email.includes(query);
+
+      const matchesStatus = statusFilter === "all" || (user.accountStatus && user.accountStatus.toLowerCase() === statusFilter.toLowerCase());
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return sortBy === "asc" ? dateA - dateB : dateB - dateA;
+    });
 
   // Helper to format role name
   const formatRole = (role: string) => {
@@ -45,6 +58,14 @@ export default function UserManagementPage() {
     } catch {
       return dateString;
     }
+  };
+
+  const hasActiveFilters = statusFilter !== "all" || sortBy !== "desc";
+
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setSortBy("desc");
+    setIsFilterOpen(false);
   };
 
   return (
@@ -72,10 +93,81 @@ export default function UserManagementPage() {
               className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:border-zinc-400 transition-colors"
             />
           </div>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 border border-zinc-200 rounded-full text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors bg-white">
+          <div className="relative">
+            <button 
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={`flex items-center gap-2 px-4 py-2 border rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                hasActiveFilters 
+                  ? "bg-black text-white border-black" 
+                  : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
+              }`}
+            >
               <Filter size={14} /> Filter
+              {hasActiveFilters && (
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              )}
             </button>
+
+            {/* Filter Menu Popover */}
+            <AnimatePresence>
+              {isFilterOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsFilterOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-zinc-200/80 shadow-xl p-4 z-20 space-y-4"
+                  >
+                    <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+                      <span className="font-semibold text-zinc-950 text-sm">Filters & Sorting</span>
+                      <button 
+                        onClick={() => setIsFilterOpen(false)}
+                        className="p-1 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-950 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Sort by Joined Date</label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-zinc-400 transition-colors"
+                        >
+                          <option value="desc">Newest First</option>
+                          <option value="asc">Oldest First</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account Status</label>
+                        <select
+                          value={statusFilter}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-zinc-400 transition-colors"
+                        >
+                          <option value="all">All Statuses</option>
+                          <option value="active">Active</option>
+                          <option value="suspended">Suspended</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="w-full py-2 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors text-xs font-semibold rounded-xl uppercase tracking-wider text-center"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
