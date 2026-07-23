@@ -11,6 +11,9 @@ export default function UserManagementPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
@@ -36,6 +39,10 @@ export default function UserManagementPage() {
       const dateB = new Date(b.createdAt || 0).getTime();
       return sortBy === "asc" ? dateA - dateB : dateB - dateA;
     });
+
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   // Helper to format role name
   const formatRole = (role: string) => {
@@ -65,7 +72,23 @@ export default function UserManagementPage() {
   const clearFilters = () => {
     setStatusFilter("all");
     setSortBy("desc");
+    setCurrentPage(1);
     setIsFilterOpen(false);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortByChange = (value: string) => {
+    setSortBy(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1);
   };
 
   return (
@@ -89,7 +112,7 @@ export default function UserManagementPage() {
               type="text" 
               placeholder="Search by name or email..." 
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:border-zinc-400 transition-colors"
             />
           </div>
@@ -134,7 +157,7 @@ export default function UserManagementPage() {
                         <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Sort by Joined Date</label>
                         <select
                           value={sortBy}
-                          onChange={(e) => setSortBy(e.target.value)}
+                          onChange={(e) => handleSortByChange(e.target.value)}
                           className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-zinc-400 transition-colors"
                         >
                           <option value="desc">Newest First</option>
@@ -146,7 +169,7 @@ export default function UserManagementPage() {
                         <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Account Status</label>
                         <select
                           value={statusFilter}
-                          onChange={(e) => setStatusFilter(e.target.value)}
+                          onChange={(e) => handleStatusFilterChange(e.target.value)}
                           className="w-full px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:border-zinc-400 transition-colors"
                         >
                           <option value="all">All Statuses</option>
@@ -201,7 +224,7 @@ export default function UserManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {filteredUsers.map((user) => {
+                  {paginatedUsers.map((user) => {
                     const formattedStatus = formatStatus(user.accountStatus);
                     return (
                       <tr key={user.id} className="hover:bg-zinc-50/50 transition-colors group">
@@ -237,11 +260,39 @@ export default function UserManagementPage() {
             </div>
             
             <div className="p-4 border-t border-zinc-200/60 flex items-center justify-between text-sm text-zinc-500 bg-zinc-50/50">
-              <span>Showing {filteredUsers.length} entries</span>
+              <span>
+                Showing {filteredUsers.length === 0 ? 0 : startIndex + 1} to{" "}
+                {Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length)} of{" "}
+                {filteredUsers.length} entries
+              </span>
               <div className="flex gap-1">
-                <button className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white">Prev</button>
-                <button className="px-3 py-1 border border-zinc-200 rounded-lg bg-zinc-950 text-white">1</button>
-                <button className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white">Next</button>
+                <button 
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white disabled:opacity-50 disabled:hover:bg-white transition-colors cursor-pointer"
+                >
+                  Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+                  <button 
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 border border-zinc-200 rounded-lg transition-colors cursor-pointer ${
+                      currentPage === page 
+                        ? "bg-zinc-950 text-white" 
+                        : "bg-white hover:bg-zinc-100 text-zinc-700"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button 
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="px-3 py-1 border border-zinc-200 rounded-lg hover:bg-zinc-100 bg-white disabled:opacity-50 disabled:hover:bg-white transition-colors cursor-pointer"
+                >
+                  Next
+                </button>
               </div>
             </div>
           </>
