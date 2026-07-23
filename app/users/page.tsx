@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Search, Filter, Edit, Ban, Loader2, X, User as UserIcon, Mail, Phone, Calendar, Shield, Globe, Award, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { getAllUsersRequest } from "@/service/userService";
+import { getAllUsersRequest, getUserRegistrationsRequest } from "@/service/userService";
 import { getPublicEventsRequest } from "@/service/eventService";
 import CustomSelect from "@/components/CustomSelect";
 
@@ -32,8 +32,15 @@ export default function UserManagementPage() {
     queryFn: getPublicEventsRequest,
   });
 
+  const { data: userRegsData, isLoading: isUserRegsLoading } = useQuery({
+    queryKey: ["user-registrations", selectedUser?.id],
+    queryFn: () => getUserRegistrationsRequest(selectedUser.id),
+    enabled: !!selectedUser,
+  });
+
   const rawUsers = data?.data || [];
   const rawEvents = eventsData?.data || [];
+  const userRegistrations = userRegsData?.data || [];
 
   // Filter users based on search query and status filter, then sort by Joined Date
   const filteredUsers = rawUsers
@@ -368,7 +375,7 @@ export default function UserManagementPage() {
                   {[
                     { id: "info", label: "General Info", icon: UserIcon },
                     { id: "organized", label: `Organized Events (${rawEvents.filter((e: any) => e.organizerId === selectedUser.id).length})`, icon: Calendar },
-                    { id: "registered", label: "Registered Events", icon: Award },
+                    { id: "registered", label: `Registered Events (${userRegistrations.length})`, icon: Award },
                   ].map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -487,12 +494,35 @@ export default function UserManagementPage() {
                   )}
 
                   {activeTab === "registered" && (
-                    <div className="p-6 border border-zinc-100 bg-zinc-50/50 rounded-2xl text-center space-y-2">
-                      <AlertCircle className="mx-auto text-zinc-400" size={32} />
-                      <h4 className="text-sm font-semibold text-zinc-900">Registered Events</h4>
-                      <p className="text-xs text-zinc-500 max-w-sm mx-auto leading-relaxed">
-                        To view the list of events this user has registered for, backend API endpoints mapping registration collections must be enabled.
-                      </p>
+                    <div className="space-y-2">
+                      {isUserRegsLoading ? (
+                        <div className="flex justify-center items-center py-10">
+                          <Loader2 className="animate-spin text-zinc-900" size={24} />
+                        </div>
+                      ) : userRegistrations.length === 0 ? (
+                        <div className="text-center py-10 text-zinc-500">
+                          <p className="text-sm font-medium">No registrations found for this user.</p>
+                        </div>
+                      ) : (
+                        userRegistrations.map((reg: any) => (
+                          <div key={reg.id} className="p-3.5 bg-zinc-50/60 border border-zinc-100 rounded-2xl flex items-center justify-between hover:bg-zinc-50 transition-colors">
+                            <div>
+                              <h4 className="text-sm font-semibold text-zinc-900">{reg.eventTitle}</h4>
+                              <p className="text-xs text-zinc-500 mt-0.5">{formatDate(reg.startDate)}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 capitalize">
+                                {reg.eventType}
+                              </span>
+                              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                                reg.status === 'confirmed' || reg.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-500'
+                              }`}>
+                                {reg.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   )}
                 </div>

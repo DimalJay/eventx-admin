@@ -25,3 +25,9 @@ export const getAllUsersRequest = async (): Promise<UserResponse> => {
     method: "GET",
   });
 };
+
+export const getUserRegistrationsRequest = async (userId: number): Promise<any> => {
+  return request(`/user/registrations?userId=${userId}`, {
+    method: "GET",
+  });
+};
