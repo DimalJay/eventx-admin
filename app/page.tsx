@@ -10,19 +10,8 @@ import {
   Ticket,
   Activity,
   ArrowUpRight,
-  ArrowDownRight,
-  DollarSign,
-  UserPlus,
-  AlertCircle
+  ArrowDownRight
 } from "lucide-react";
-
-const RECENT_ACTIVITIES = [
-  { id: 1, type: "event", title: "New Event Created: Tech Symposium 2026", time: "10 mins ago", icon: Calendar, color: "text-zinc-900 bg-zinc-100" },
-  { id: 2, type: "user", title: "New Organizer Registration: CodeClub", time: "35 mins ago", icon: UserPlus, color: "text-zinc-900 bg-zinc-100" },
-  { id: 3, type: "alert", title: "High memory usage detected on Web Server 02", time: "1 hour ago", icon: AlertCircle, color: "text-red-600 bg-red-50" },
-  { id: 4, type: "payment", title: "Payment batch processed: $4,520.00", time: "2 hours ago", icon: DollarSign, color: "text-zinc-900 bg-zinc-100" },
-  { id: 5, type: "user", title: "Account suspended: user123 (Policy Violation)", time: "3 hours ago", icon: Users, color: "text-red-600 bg-red-50" },
-];
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -180,17 +169,26 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 space-y-6">
-            {RECENT_ACTIVITIES.map((activity, index) => (
-              <div key={activity.id} className="relative flex items-start gap-4 group">
-                <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${activity.color} ring-4 ring-white group-hover:scale-110 transition-transform`}>
-                  <activity.icon size={18} />
-                </div>
-                <div className="pt-1 flex-1">
-                  <p className="text-sm font-semibold text-zinc-800 leading-tight">{activity.title}</p>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-1">{activity.time}</p>
-                </div>
-              </div>
-            ))}
+            {isLoading ? (
+              <div className="text-center py-10 text-xs text-zinc-400">Loading activities...</div>
+            ) : !statsData?.data?.recentActivities || statsData.data.recentActivities.length === 0 ? (
+              <div className="text-center py-10 text-xs text-zinc-400">No recent activities.</div>
+            ) : (
+              statsData.data.recentActivities.map((activity) => {
+                const Icon = activity.type === "user" ? Users : Calendar;
+                return (
+                  <div key={activity.id} className="relative flex items-start gap-4 group">
+                    <div className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-zinc-900 bg-zinc-100 ring-4 ring-white group-hover:scale-110 transition-transform">
+                      <Icon size={18} />
+                    </div>
+                    <div className="pt-1 flex-1">
+                      <p className="text-sm font-semibold text-zinc-800 leading-tight">{activity.title}</p>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-1">{activity.time}</p>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </motion.div>
       </div>
