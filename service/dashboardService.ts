@@ -31,6 +31,11 @@ export interface DashboardStatsResponse {
       time: string;
       timestamp: number;
     }>;
+    chartData?: Array<{
+      label: string;
+      value: number;
+      percentage: number;
+    }>;
   };
 }
 
