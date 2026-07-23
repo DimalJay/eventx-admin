@@ -2,6 +2,8 @@
 
 import React from "react";
 import { motion, Variants } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { getDashboardStatsRequest } from "@/service/dashboardService";
 import {
   Users,
   Calendar,
@@ -13,42 +15,6 @@ import {
   UserPlus,
   AlertCircle
 } from "lucide-react";
-
-// Mock data based on spec
-const STATS = [
-  {
-    title: "Total Active Users",
-    value: "12,450",
-    change: "+12.5%",
-    isPositive: true,
-    icon: Users,
-    color: "bg-zinc-100 text-zinc-900"
-  },
-  {
-    title: "Total Events Created",
-    value: "842",
-    change: "+5.2%",
-    isPositive: true,
-    icon: Calendar,
-    color: "bg-zinc-100 text-zinc-900"
-  },
-  {
-    title: "Total Registrations",
-    value: "45,231",
-    change: "+18.1%",
-    isPositive: true,
-    icon: Ticket,
-    color: "bg-zinc-100 text-zinc-900"
-  },
-  {
-    title: "System Uptime",
-    value: "99.99%",
-    change: "0.00%",
-    isPositive: true,
-    icon: Activity,
-    color: "bg-zinc-100 text-zinc-900"
-  }
-];
 
 const RECENT_ACTIVITIES = [
   { id: 1, type: "event", title: "New Event Created: Tech Symposium 2026", time: "10 mins ago", icon: Calendar, color: "text-zinc-900 bg-zinc-100" },
@@ -72,6 +38,46 @@ const itemVariants: Variants = {
 };
 
 export default function AdminDashboard() {
+  const { data: statsData, isLoading } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: getDashboardStatsRequest,
+  });
+
+  const stats = [
+    {
+      title: "Total Active Users",
+      value: isLoading ? "..." : statsData?.data?.activeUsers?.value ?? "0",
+      change: statsData?.data?.activeUsers?.change ?? "+0.0%",
+      isPositive: statsData?.data?.activeUsers?.isPositive ?? true,
+      icon: Users,
+      color: "bg-zinc-100 text-zinc-900"
+    },
+    {
+      title: "Total Events Created",
+      value: isLoading ? "..." : statsData?.data?.eventsCreated?.value ?? "0",
+      change: statsData?.data?.eventsCreated?.change ?? "+0.0%",
+      isPositive: statsData?.data?.eventsCreated?.isPositive ?? true,
+      icon: Calendar,
+      color: "bg-zinc-100 text-zinc-900"
+    },
+    {
+      title: "Total Registrations",
+      value: isLoading ? "..." : statsData?.data?.registrations?.value ?? "0",
+      change: statsData?.data?.registrations?.change ?? "0.00%",
+      isPositive: statsData?.data?.registrations?.isPositive ?? true,
+      icon: Ticket,
+      color: "bg-zinc-100 text-zinc-900"
+    },
+    {
+      title: "System Uptime",
+      value: isLoading ? "..." : statsData?.data?.uptime?.value ?? "99.99%",
+      change: statsData?.data?.uptime?.change ?? "0.00%",
+      isPositive: statsData?.data?.uptime?.isPositive ?? true,
+      icon: Activity,
+      color: "bg-zinc-100 text-zinc-900"
+    }
+  ];
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -96,7 +102,7 @@ export default function AdminDashboard() {
         animate="show"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
       >
-        {STATS.map((stat, index) => (
+        {stats.map((stat, index) => (
           <motion.div
             key={index}
             variants={itemVariants}
