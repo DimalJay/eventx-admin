@@ -133,24 +133,31 @@ export default function AdminDashboard() {
           </div>
 
           <div className="h-[300px] w-full flex items-end gap-2 justify-between px-4 pb-4">
-            {/* Minimal CSS Chart Placeholder */}
-            {[40, 70, 45, 90, 65, 85, 100].map((height, i) => (
+            {(statsData?.data?.chartData || [
+              { label: "Mon", value: 0, percentage: 0 },
+              { label: "Tue", value: 0, percentage: 0 },
+              { label: "Wed", value: 0, percentage: 0 },
+              { label: "Thu", value: 0, percentage: 0 },
+              { label: "Fri", value: 0, percentage: 0 },
+              { label: "Sat", value: 0, percentage: 0 },
+              { label: "Sun", value: 0, percentage: 0 }
+            ]).map((day, i) => (
               <div key={i} className="w-full max-w-[40px] flex flex-col justify-end items-center gap-2 group relative">
-                <div className="absolute -top-8 bg-zinc-950 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                  {height}%
+                <div className="absolute -top-8 bg-zinc-950 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  {day.value} Regs
                 </div>
                 <div
                   className="w-full bg-zinc-100 rounded-t-lg relative overflow-hidden group-hover:bg-zinc-200 transition-colors"
-                  style={{ height: `${height}%` }}
+                  style={{ height: `${Math.max(day.percentage, 5)}%` }} // Ensure at least 5% height so it is slightly visible even if 0
                 >
                   <motion.div
                     initial={{ height: 0 }}
-                    animate={{ height: `${height}%` }}
+                    animate={{ height: `${day.percentage}%` }}
                     transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
                     className="absolute bottom-0 w-full bg-zinc-950 rounded-t-lg"
                   />
                 </div>
-                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Day {i + 1}</span>
+                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{day.label}</span>
               </div>
             ))}
           </div>
