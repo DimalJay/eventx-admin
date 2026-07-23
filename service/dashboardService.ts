@@ -24,6 +24,13 @@ export interface DashboardStatsResponse {
       change: string;
       isPositive: boolean;
     };
+    recentActivities?: Array<{
+      id: string;
+      type: 'user' | 'event';
+      title: string;
+      time: string;
+      timestamp: number;
+    }>;
   };
 }
 
