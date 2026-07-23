@@ -54,12 +54,6 @@ export default function UserManagementPage() {
           <h1 className="text-2xl font-semibold text-zinc-950 tracking-tight">User Management</h1>
           <p className="text-zinc-500 text-sm mt-1">Manage and monitor all system users.</p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <button className="px-5 py-2.5 bg-black text-white rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-black/90 transition shadow-xs">
-            Add New User
-          </button>
-        </div>
       </div>
 
       <motion.div 
