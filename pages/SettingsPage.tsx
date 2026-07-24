@@ -6,10 +6,10 @@ import {
   Lock, 
   Save, 
   Check, 
-  Eye, 
-  EyeOff, 
   Loader2 
 } from "lucide-react";
+import ProfileSettingsForm from "@/components/admin/ProfileSettingsForm";
+import SecuritySettingsForm from "@/components/admin/SecuritySettingsForm";
 
 type TabType = "profile" | "security";
 
@@ -32,9 +32,6 @@ export default function SettingsPage() {
     new: "",
     confirm: ""
   });
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,146 +124,22 @@ export default function SettingsPage() {
 
           {/* Inner Content Area */}
           <div className="p-6 flex-1">
-            <div
-              className="space-y-6"
-            >
-                {/* --- PROFILE TAB --- */}
-                {activeTab === "profile" && (
-                  <div className="space-y-6">
-                    <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-zinc-100">
-                      {/* Styled Avatar initials in black background */}
-                      <div className="w-20 h-20 rounded-full bg-zinc-900 text-white flex items-center justify-center text-2xl font-bold uppercase ring-4 ring-zinc-100 shadow-inner">
-                        {profile.name.split(" ").map(w => w[0]).join("")}
-                      </div>
-                      <div className="text-center sm:text-left space-y-1">
-                        <h3 className="text-md font-semibold text-zinc-900">{profile.name}</h3>
-                        <p className="text-xs font-bold text-zinc-550 uppercase tracking-wider">{profile.role}</p>
-                        <p className="text-xs text-zinc-400">Avatar initials generated automatically.</p>
-                      </div>
-                    </div>
+            <div className="space-y-6">
+              {/* --- PROFILE TAB --- */}
+              {activeTab === "profile" && (
+                <ProfileSettingsForm 
+                  profile={profile} 
+                  onProfileChange={setProfile} 
+                />
+              )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Display Name</label>
-                        <input 
-                          type="text" 
-                          value={profile.name} 
-                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                          className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all" 
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Admin Email</label>
-                        <input 
-                          type="email" 
-                          value={profile.email} 
-                          onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                          className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all" 
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Phone Number</label>
-                        <input 
-                          type="text" 
-                          value={profile.phone} 
-                          onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                          className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all" 
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">System Role</label>
-                        <input 
-                          type="text" 
-                          value={profile.role} 
-                          disabled
-                          className="w-full bg-zinc-100 border border-zinc-200 text-zinc-400 rounded-xl px-4 py-2.5 text-sm cursor-not-allowed" 
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* --- SECURITY TAB --- */}
-                {activeTab === "security" && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-zinc-50 border border-zinc-100 rounded-2xl flex items-start gap-3">
-                      <Lock className="text-zinc-500 shrink-0 mt-0.5" size={16} />
-                      <p className="text-xs text-zinc-500 leading-normal">
-                        For security, please make sure your password is at least 8 characters long and contains letters, numbers, and symbols.
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Current Password</label>
-                        <div className="relative">
-                          <input 
-                            type={showCurrent ? "text" : "password"} 
-                            value={passwords.current}
-                            onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                            placeholder="••••••••"
-                            className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl pl-4 pr-10 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all"
-                            required
-                            autoComplete="current-password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowCurrent(!showCurrent)}
-                            className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-650"
-                          >
-                            {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">New Password</label>
-                        <div className="relative">
-                          <input 
-                            type={showNew ? "text" : "password"} 
-                            value={passwords.new}
-                            onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                            placeholder="••••••••"
-                            className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl pl-4 pr-10 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all"
-                            required
-                            autoComplete="new-password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowNew(!showNew)}
-                            className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-650"
-                          >
-                            {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Confirm New Password</label>
-                        <div className="relative">
-                          <input 
-                            type={showConfirm ? "text" : "password"} 
-                            value={passwords.confirm}
-                            onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-                            placeholder="••••••••"
-                            className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl pl-4 pr-10 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all"
-                            required
-                            autoComplete="new-password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowConfirm(!showConfirm)}
-                            className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-650"
-                          >
-                            {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              {/* --- SECURITY TAB --- */}
+              {activeTab === "security" && (
+                <SecuritySettingsForm 
+                  passwords={passwords} 
+                  onPasswordsChange={setPasswords} 
+                />
+              )}
             </div>
           </div>
 
