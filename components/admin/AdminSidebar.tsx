@@ -15,7 +15,6 @@ import {
   X,
   LogOut
 } from "lucide-react";
-import { motion } from "framer-motion";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
 

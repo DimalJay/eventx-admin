@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, Filter, Terminal } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Filter } from "lucide-react";
 
 const LOGS = [
   { id: "L001", admin: "System Admin (super)", action: "User Ban", entity: "U005 (John Doe)", time: "2026-07-17 14:30:22", status: "Success", ip: "192.168.1.5" },
@@ -21,9 +20,7 @@ export default function AuditLogsPage() {
         </div>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div 
         className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs overflow-hidden"
       >
         <div className="p-4 border-b border-zinc-200/60 flex flex-col sm:flex-row gap-4 justify-between bg-zinc-50/50">
@@ -74,7 +71,7 @@ export default function AuditLogsPage() {
             </tbody>
           </table>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -18,13 +18,16 @@ export const metadata: Metadata = {
   description: "Administrative dashboard for EventX platform",
 };
 
+import { Toaster } from "sonner";
+import { QueryProvider } from "@/providers/QueryProvider";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -41,7 +44,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col overflow-x-hidden">
-        <AdminLayoutWrapper>{children}</AdminLayoutWrapper>
+        <QueryProvider>
+          <AdminLayoutWrapper>{children}</AdminLayoutWrapper>
+          <Toaster position="top-center" richColors />
+        </QueryProvider>
       </body>
     </html>
   );

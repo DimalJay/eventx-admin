@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Bell, Search, Menu, User } from "lucide-react";
-import { motion } from "framer-motion";
+
 
 export function AdminHeader({ 
   setSidebarOpen 
