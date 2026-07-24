@@ -82,7 +82,7 @@ export function AdminSidebar({
             Main Menu
           </div>
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.path || (pathname.startsWith(item.path) && item.path !== "/");
+            const isActive = pathname ? (pathname === item.path || (pathname.startsWith(item.path) && item.path !== "/")) : false;
             const Icon = item.icon;
             return (
               <Link

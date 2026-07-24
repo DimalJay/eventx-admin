@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
 
@@ -10,19 +10,9 @@ export function AdminLayoutWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
-
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("adminLoggedIn");
-    if (!isLoggedIn && !isLoginPage) {
-      router.push("/login");
-    }
-  }, [pathname, isLoginPage, router]);
-
-  const isLoggedIn = typeof window !== "undefined" ? localStorage.getItem("adminLoggedIn") : null;
 
   if (isLoginPage) {
     return (
@@ -32,10 +22,6 @@ export function AdminLayoutWrapper({
         </main>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    return null;
   }
 
   return (
