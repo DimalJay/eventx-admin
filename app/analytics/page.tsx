@@ -154,7 +154,7 @@ export default function AnalyticsPage() {
                 <div className="absolute bottom-0 w-full bg-zinc-900 rounded-t-lg h-full opacity-85 hover:opacity-100 transition-opacity" />
               </div>
               <span className="text-[10px] font-bold text-zinc-450 uppercase mt-1">{d.label}</span>
-              <span className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -translate-y-8 bg-zinc-900 text-white px-1.5 py-0.5 rounded font-mono">
+              <span className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -translate-y-8 bg-zinc-900 px-1.5 py-0.5 rounded font-mono">
                 {d.value}
               </span>
             </div>
@@ -179,10 +179,10 @@ export default function AnalyticsPage() {
                 <div className="w-full bg-zinc-100 rounded-t-lg relative" style={{ height: `${heightVal}%` }}>
                   <div className="absolute bottom-0 w-full bg-emerald-600 rounded-t-lg h-full opacity-85 hover:opacity-100 transition-opacity" />
                 </div>
-                <span className="text-[9px] font-semibold text-zinc-400 truncate max-w-[40px] uppercase mt-1">
+                <span className="text-[9px] font-semibold text-zinc-400 truncate max-w-10 uppercase mt-1">
                   {e.title}
                 </span>
-                <span className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -translate-y-8 bg-zinc-900 text-white px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -translate-y-8 bg-zinc-900 px-1.5 py-0.5 rounded font-mono">
                   Cap: {e.capacity || "N/A"}
                 </span>
               </div>
