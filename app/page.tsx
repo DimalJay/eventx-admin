@@ -9,16 +9,66 @@ import {
   Ticket,
   Activity,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  ChevronDown
 } from "lucide-react";
 
 export default function AdminDashboard() {
   const [range, setRange] = useState("week");
+  const [activeTab, setActiveTab] = useState<"registrations" | "revenue">("registrations");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const ranges = [
+    { value: "week", label: "This Week" },
+    { value: "month", label: "This Month" },
+    { value: "year", label: "This Year" }
+  ];
+  const currentRangeLabel = ranges.find(r => r.value === range)?.label || "This Week";
 
   const { data: statsData, isLoading } = useQuery({
     queryKey: ["dashboard-stats", range],
     queryFn: () => getDashboardStatsRequest(range),
   });
+
+  const defaultChartData = [
+    { label: "Mon", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
+    { label: "Tue", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
+    { label: "Wed", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
+    { label: "Thu", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
+    { label: "Fri", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
+    { label: "Sat", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
+    { label: "Sun", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 }
+  ];
+  const chartData = statsData?.data?.chartData || defaultChartData;
+
+  const maxValue = chartData.reduce((max, item) => {
+    const val = activeTab === "registrations" ? item.registrations : item.revenue;
+    return val > max ? val : max;
+  }, 0) || 10;
+
+  const yAxisSteps = [
+    maxValue,
+    Math.round(maxValue * 0.75),
+    Math.round(maxValue * 0.5),
+    Math.round(maxValue * 0.25),
+    0
+  ];
+
+  const formatYValue = (value: number) => {
+    if (activeTab === "revenue") {
+      if (value >= 1000000) {
+        return `$${(value / 1000000).toFixed(1)}M`;
+      }
+      if (value >= 1000) {
+        return `$${(value / 1000).toFixed(1)}k`;
+      }
+      return `$${value}`;
+    }
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(1)}k`;
+    }
+    return value.toString();
+  };
 
   const stats = [
     {
@@ -100,75 +150,135 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content Area (Chart Placeholder) */}
         <div className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-zinc-950">Revenue & Registrations</h2>
-              <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center gap-1.5 text-zinc-500">
-                  <span className="w-2 h-2 rounded-full bg-zinc-900"></span>
-                  <span>Registrations</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-zinc-500">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                  <span>Revenue</span>
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <h2 className="text-lg font-semibold text-zinc-950">Overview Metrics</h2>
+              
+              {/* Tab Toggles */}
+              <div className="flex bg-zinc-100 p-0.5 rounded-xl w-fit">
+                <button
+                  onClick={() => setActiveTab("registrations")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
+                    activeTab === "registrations"
+                      ? "bg-zinc-950 text-white shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                >
+                  Registrations
+                </button>
+                <button
+                  onClick={() => setActiveTab("revenue")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
+                    activeTab === "revenue"
+                      ? "bg-zinc-950 text-white shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                >
+                  Revenue
+                </button>
               </div>
             </div>
-            <select
-              value={range}
-              onChange={(e) => setRange(e.target.value)}
-              className="bg-zinc-50 border border-zinc-200 text-zinc-700 text-sm rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-zinc-950/20"
-            >
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
-            </select>
+            
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center justify-between gap-3 bg-white border border-zinc-200 text-zinc-800 text-xs font-semibold rounded-2xl px-4 py-2.5 w-36 outline-none hover:bg-zinc-50 transition-all cursor-pointer shadow-2xs"
+              >
+                <span>{currentRangeLabel}</span>
+                <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {dropdownOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div className="fixed inset-0 z-20" onClick={() => setDropdownOpen(false)} />
+                  
+                  {/* Menu */}
+                  <div className="absolute right-0 mt-2 w-36 bg-white border border-zinc-200/60 rounded-2xl shadow-lg z-30 overflow-hidden py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {ranges.map((r) => (
+                      <div
+                        key={r.value}
+                        onClick={() => {
+                          setRange(r.value);
+                          setDropdownOpen(false);
+                        }}
+                        className={`px-4 py-2.5 text-xs font-semibold cursor-pointer transition-colors ${
+                          range === r.value
+                            ? "bg-zinc-950 text-white"
+                            : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-950"
+                        }`}
+                      >
+                        {r.label}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="h-[300px] w-full flex items-end gap-3 justify-between px-4 pb-4">
-            {(statsData?.data?.chartData || [
-              { label: "Mon", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
-              { label: "Tue", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
-              { label: "Wed", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
-              { label: "Thu", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
-              { label: "Fri", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
-              { label: "Sat", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 },
-              { label: "Sun", registrations: 0, regPercentage: 0, revenue: 0, revPercentage: 0 }
-            ]).map((day, i) => (
-              <div key={i} className="w-full flex flex-col justify-end items-center gap-2 group relative">
-                {/* Tooltip */}
-                <div className="absolute -top-16 bg-zinc-950 text-white text-[10px] font-semibold py-1.5 px-2.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg flex flex-col gap-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-                    <span>{day.registrations} Regs</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    <span>${day.revenue.toLocaleString()} Revenue</span>
-                  </div>
-                </div>
+          <div className="flex gap-4">
+            {/* Y-Axis Labels */}
+            <div className="flex flex-col justify-between text-[10px] font-bold text-zinc-400 h-64 pb-8 w-12 text-right select-none">
+              {yAxisSteps.map((step, idx) => (
+                <span key={idx}>{formatYValue(step)}</span>
+              ))}
+            </div>
 
-                {/* Combined bar container */}
-                <div className="w-full flex items-end gap-1.5 h-48">
-                  {/* Registrations Bar */}
-                  <div className="w-1/2 bg-zinc-100 rounded-t-md relative overflow-hidden group-hover:bg-zinc-200/80 transition-colors h-full flex items-end">
-                    <div
-                      className="w-full bg-zinc-900 rounded-t-md"
-                      style={{ height: `${Math.max(day.regPercentage, 5)}%` }}
-                    />
-                  </div>
-                  {/* Revenue Bar */}
-                  <div className="w-1/2 bg-emerald-50 rounded-t-md relative overflow-hidden group-hover:bg-emerald-100/55 transition-colors h-full flex items-end">
-                    <div
-                      className="w-full bg-emerald-600 rounded-t-md"
-                      style={{ height: `${Math.max(day.revPercentage, 5)}%` }}
-                    />
-                  </div>
-                </div>
-
-                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{day.label}</span>
+            {/* Chart Area */}
+            <div className="flex-1 relative h-64">
+              {/* Grid Lines */}
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 h-full">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border-b border-zinc-100/80 w-full h-0"></div>
+                ))}
               </div>
-            ))}
+
+              {/* Bars and X-Axis Labels */}
+              <div className="absolute inset-0 flex items-end justify-between px-2 pb-8 h-full">
+                {chartData.map((day, i) => {
+                  const percentage = activeTab === "registrations" ? day.regPercentage : day.revPercentage;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center justify-end h-full relative group">
+                      {/* Tooltip */}
+                      <div className="absolute -top-10 bg-zinc-950 text-white text-[10px] font-semibold py-1.5 px-2.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg flex flex-col gap-0.5 pointer-events-none">
+                        {activeTab === "registrations" ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                            <span>{day.registrations} Regs</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                            <span>${day.revenue.toLocaleString()} Revenue</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Single bar display based on activeTab */}
+                      <div className="w-full flex items-end justify-center h-full pb-1 relative z-10">
+                        {activeTab === "registrations" ? (
+                          <div
+                            className="w-full max-w-[24px] bg-zinc-900 rounded-t-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer"
+                            style={{ height: `${percentage}%` }}
+                          />
+                        ) : (
+                          <div
+                            className="w-full max-w-[24px] bg-emerald-600 rounded-t-md hover:bg-emerald-500 transition-all duration-200 cursor-pointer"
+                            style={{ height: `${percentage}%` }}
+                          />
+                        )}
+                      </div>
+
+                      {/* X-Axis Label */}
+                      <span className="absolute -bottom-6 text-[10px] text-zinc-400 font-bold uppercase tracking-wider select-none">
+                        {day.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
