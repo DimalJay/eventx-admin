@@ -149,7 +149,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content Area (Chart Placeholder) */}
-        <div className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6">
+        <div className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <h2 className="text-lg font-semibold text-zinc-950">Overview Metrics</h2>
@@ -217,9 +217,9 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-4">
             {/* Y-Axis Labels */}
-            <div className="flex flex-col justify-between text-[10px] font-bold text-zinc-400 h-64 pb-8 w-12 text-right select-none">
+            <div className="flex flex-col justify-between text-[10px] font-bold text-zinc-400 h-64 pb-5 w-12 text-right select-none">
               {yAxisSteps.map((step, idx) => (
                 <span key={idx}>{formatYValue(step)}</span>
               ))}
@@ -228,14 +228,14 @@ export default function AdminDashboard() {
             {/* Chart Area */}
             <div className="flex-1 relative h-64">
               {/* Grid Lines */}
-              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 h-full">
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-5 h-full">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <div key={i} className="border-b border-zinc-100/80 w-full h-0"></div>
                 ))}
               </div>
 
               {/* Bars and X-Axis Labels */}
-              <div className="absolute inset-0 flex items-end justify-between px-2 pb-8 h-full">
+              <div className="absolute inset-0 flex items-end justify-between px-2 pb-5 h-full">
                 {chartData.map((day, i) => {
                   const percentage = activeTab === "registrations" ? day.regPercentage : day.revPercentage;
                   return (
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
                       </div>
 
                       {/* X-Axis Label */}
-                      <span className="absolute -bottom-6 text-[10px] text-zinc-400 font-bold uppercase tracking-wider select-none">
+                      <span className="absolute -bottom-4 text-[10px] text-zinc-400 font-bold uppercase tracking-wider select-none">
                         {day.label}
                       </span>
                     </div>
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
             ) : !statsData?.data?.recentActivities || statsData.data.recentActivities.length === 0 ? (
               <div className="text-center py-10 text-xs text-zinc-400">No recent activities.</div>
             ) : (
-              statsData.data.recentActivities.map((activity) => {
+              statsData.data.recentActivities.slice(0, 5).map((activity) => {
                 const Icon = activity.type === "user" ? Users : Calendar;
                 return (
                   <div key={activity.id} className="relative flex items-start gap-4 group">
