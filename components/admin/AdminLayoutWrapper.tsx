@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
 
@@ -11,8 +11,32 @@ export function AdminLayoutWrapper({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
   const isLoginPage = pathname === "/login";
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+    if (!isLoggedIn && !isLoginPage) {
+      router.replace("/login");
+    } else if (isLoggedIn && isLoginPage) {
+      router.replace("/");
+    } else {
+      setLoading(false);
+    }
+  }, [isLoginPage, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+          <p className="text-zinc-400 text-sm">Checking authorization...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoginPage) {
     return (
