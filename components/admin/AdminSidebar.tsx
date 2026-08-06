@@ -12,7 +12,6 @@ import {
   AlertOctagon,
   BarChart3,
   Settings,
-  FileText,
   Menu,
   X,
   LogOut,
@@ -29,7 +28,6 @@ const MENU_ITEMS = [
   { name: "Complaints & Reports", icon: AlertOctagon, path: "/reports" },
   { name: "Analytics & Reports", icon: BarChart3, path: "/analytics" },
   { name: "System Settings", icon: Settings, path: "/settings" },
-  { name: "Audit Logs", icon: FileText, path: "/logs" },
 ];
 
 export function AdminSidebar({
