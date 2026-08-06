@@ -33,14 +33,17 @@ export interface DashboardStatsResponse {
     }>;
     chartData?: Array<{
       label: string;
-      value: number;
-      percentage: number;
+      registrations: number;
+      regPercentage: number;
+      revenue: number;
+      revPercentage: number;
     }>;
   };
 }
 
-export const getDashboardStatsRequest = async (): Promise<DashboardStatsResponse> => {
+export const getDashboardStatsRequest = async (range?: string): Promise<DashboardStatsResponse> => {
   return request("/admin/dashboard-stats", {
     method: "GET",
+    params: range ? { range } : {},
   });
 };

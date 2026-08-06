@@ -22,7 +22,7 @@ export default function AnalyticsPage() {
   // Queries
   const { data: statsData, isLoading: isStatsLoading } = useQuery({
     queryKey: ["dashboard-stats"],
-    queryFn: getDashboardStatsRequest,
+    queryFn: () => getDashboardStatsRequest(),
   });
 
   const { data: usersData, isLoading: isUsersLoading } = useQuery({
