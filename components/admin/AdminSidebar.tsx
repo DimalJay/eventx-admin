@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { logoutRequest } from "@/service/authService";
 import {
   LayoutDashboard,
   Users,
@@ -36,6 +38,17 @@ export function AdminSidebar({
   setIsOpen: (val: boolean) => void
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to log out");
+    }
+  };
 
   return (
     <>
@@ -71,7 +84,7 @@ export function AdminSidebar({
             Main Menu
           </div>
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.path || (pathname.startsWith(item.path) && item.path !== "/");
+            const isActive = pathname === item.path || (!!pathname && pathname.startsWith(item.path) && item.path !== "/");
             const Icon = item.icon;
             return (
               <Link
@@ -94,7 +107,10 @@ export function AdminSidebar({
         </div>
 
         <div className="p-4 border-t border-zinc-900">
-          <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-sm font-medium">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-sm font-medium"
+          >
             <LogOut size={18} />
             <span>Logout</span>
           </button>
