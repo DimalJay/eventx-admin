@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Download, Users, Ticket, Loader2, Calendar, FileText, CheckCircle } from "lucide-react";
+import { Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getDashboardStatsRequest } from "@/service/dashboardService";
 import { getAllUsersRequest } from "@/service/userService";
 import { getPublicEventsRequest } from "@/service/eventService";
-import { BarChartCard } from "@/components/admin/BarChartCard";
 import { ReportGeneratorForm } from "@/components/admin/ReportGeneratorForm";
 import { ReportPreviewTable } from "@/components/admin/ReportPreviewTable";
 
@@ -20,11 +18,6 @@ export default function AnalyticsPage() {
   } | null>(null);
 
   // Queries
-  const { data: statsData, isLoading: isStatsLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
-    queryFn: () => getDashboardStatsRequest(),
-  });
-
   const { data: usersData, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users"],
     queryFn: getAllUsersRequest,
@@ -35,7 +28,6 @@ export default function AnalyticsPage() {
     queryFn: getPublicEventsRequest,
   });
 
-  const stats = statsData?.data;
   const users = usersData?.data || [];
   const events = eventsData?.data || [];
 

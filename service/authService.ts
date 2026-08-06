@@ -21,3 +21,14 @@ export const logoutRequest = async () => {
   localStorage.removeItem("adminLoggedIn");
   return res;
 };
+
+// update password request
+export const updateAdminPasswordRequest = async (data: any) => {
+  return request("/admin/update-password", {
+    method: "POST",
+    data: {
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    },
+  });
+};
