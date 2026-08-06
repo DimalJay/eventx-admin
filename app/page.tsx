@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStatsRequest } from "@/service/dashboardService";
 import {
@@ -286,7 +287,12 @@ export default function AdminDashboard() {
         <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-zinc-950">Recent Activity</h2>
-            <button className="text-xs text-zinc-900 font-semibold uppercase tracking-wider hover:text-zinc-600 transition">View All</button>
+            <Link
+              href="/activities"
+              className="text-xs text-zinc-900 font-semibold uppercase tracking-wider hover:text-zinc-600 transition"
+            >
+              View All
+            </Link>
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 space-y-6">

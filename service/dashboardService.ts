@@ -47,3 +47,24 @@ export const getDashboardStatsRequest = async (range?: string): Promise<Dashboar
     params: range ? { range } : {},
   });
 };
+
+export interface ActivityItem {
+  id: string;
+  type: "user" | "event";
+  title: string;
+  time: string;
+  timestamp: number;
+  date: string;
+}
+
+export interface AllActivitiesResponse {
+  success: boolean;
+  message: string;
+  data: ActivityItem[];
+}
+
+export const getAllActivitiesRequest = async (): Promise<AllActivitiesResponse> => {
+  return request("/admin/activities", {
+    method: "GET",
+  });
+};

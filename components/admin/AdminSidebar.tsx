@@ -15,7 +15,8 @@ import {
   FileText,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Activity
 } from "lucide-react";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
   { name: "User Management", icon: Users, path: "/users" },
   { name: "Event Management", icon: CalendarDays, path: "/events" },
+  { name: "Recent Activities", icon: Activity, path: "/activities" },
   { name: "Complaints & Reports", icon: AlertOctagon, path: "/reports" },
   { name: "Analytics & Reports", icon: BarChart3, path: "/analytics" },
   { name: "System Settings", icon: Settings, path: "/settings" },
