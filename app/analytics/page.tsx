@@ -136,60 +136,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* User Growth (Daily Registration last 7 days) */}
-        <BarChartCard
-          title="Daily Registrations"
-          subtitle="Last 7 Days"
-          icon={<Users size={18} />}
-          iconBgClass="bg-blue-50"
-          iconTextClass="text-blue-600"
-          isLoading={isStatsLoading}
-          isEmpty={!stats?.chartData || stats.chartData.length === 0}
-          emptyMessage="No registration metrics available."
-        >
-          {stats?.chartData?.map((d: any, i: number) => (
-            <div key={i} className="w-full flex flex-col items-center gap-1 group">
-              <div className="w-full bg-zinc-100 rounded-t-lg relative" style={{ height: `${d.percentage || 15}%` }}>
-                <div className="absolute bottom-0 w-full bg-zinc-900 rounded-t-lg h-full opacity-85 hover:opacity-100 transition-opacity" />
-              </div>
-              <span className="text-[10px] font-bold text-zinc-450 uppercase mt-1">{d.label}</span>
-              <span className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -translate-y-8 bg-zinc-900 text-white px-1.5 py-0.5 rounded font-mono">
-                {d.value}
-              </span>
-            </div>
-          ))}
-        </BarChartCard>
 
-        {/* Capacity / Ticket Price Distribution */}
-        <BarChartCard
-          title="Upcoming Events Scale"
-          subtitle="Scale Overview"
-          icon={<Ticket size={18} />}
-          iconBgClass="bg-emerald-50"
-          iconTextClass="text-emerald-600"
-          isLoading={isEventsLoading}
-          isEmpty={events.length === 0}
-          emptyMessage="No platform events found."
-        >
-          {events.slice(0, 8).map((e: any, i: number) => {
-            const heightVal = Math.min(Math.max((e.capacity / 500) * 100, 15), 100);
-            return (
-              <div key={i} className="w-full flex flex-col items-center gap-1 group">
-                <div className="w-full bg-zinc-100 rounded-t-lg relative" style={{ height: `${heightVal}%` }}>
-                  <div className="absolute bottom-0 w-full bg-emerald-600 rounded-t-lg h-full opacity-85 hover:opacity-100 transition-opacity" />
-                </div>
-                <span className="text-[9px] font-semibold text-zinc-400 truncate max-w-[40px] uppercase mt-1">
-                  {e.title}
-                </span>
-                <span className="text-[9px] text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity absolute -translate-y-8 bg-zinc-900 text-white px-1.5 py-0.5 rounded font-mono">
-                  Cap: {e.capacity || "N/A"}
-                </span>
-              </div>
-            );
-          })}
-        </BarChartCard>
-      </div>
 
       {/* Report Generator */}
       <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6 space-y-6">
