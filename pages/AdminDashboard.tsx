@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStatsRequest } from "@/service/dashboardService";
 import {
@@ -13,11 +13,9 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
-  const [chartRange, setChartRange] = useState("week");
-
   const { data: statsData, isLoading } = useQuery({
-    queryKey: ["dashboard-stats", chartRange],
-    queryFn: () => getDashboardStatsRequest(chartRange),
+    queryKey: ["dashboard-stats"],
+    queryFn: getDashboardStatsRequest,
   });
 
   const stats = [
@@ -102,48 +100,39 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-zinc-950">Revenue & Registrations</h2>
-            <select 
-              value={chartRange}
-              onChange={(e) => setChartRange(e.target.value)}
-              className="bg-zinc-50 border border-zinc-200 text-zinc-700 text-sm rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-zinc-950/20"
-            >
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
+            <select className="bg-zinc-50 border border-zinc-200 text-zinc-700 text-sm rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-zinc-950/20">
+              <option>This Week</option>
+              <option>This Month</option>
+              <option>This Year</option>
             </select>
           </div>
 
-          <div className="h-[300px] w-full flex items-stretch gap-2 justify-between px-4 pb-4 mt-8">
-            {(Array.isArray(statsData?.data?.chartData) && statsData.data.chartData.length > 0 ? statsData.data.chartData : [
-              { label: "Mon", registrations: 0, regPercentage: 0 },
-              { label: "Tue", registrations: 0, regPercentage: 0 },
-              { label: "Wed", registrations: 0, regPercentage: 0 },
-              { label: "Thu", registrations: 0, regPercentage: 0 },
-              { label: "Fri", registrations: 0, regPercentage: 0 },
-              { label: "Sat", registrations: 0, regPercentage: 0 },
-              { label: "Sun", registrations: 0, regPercentage: 0 }
-            ]).map((day: any, i: number) => {
-              // Ensure we have a valid number for height, fallback to 5% minimum
-              const heightValue = Math.max(Number(day.regPercentage) || Number(day.percentage) || 0, 5);
-              
-              return (
-                <div key={i} className="w-full max-w-[40px] flex flex-col justify-end items-center gap-2 group relative">
-                  <div className="absolute -top-8 bg-zinc-950 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                    {day.registrations || day.value || 0} Regs
-                  </div>
-                  <div
-                    className="w-full bg-zinc-100 rounded-t-lg relative overflow-hidden group-hover:bg-zinc-200 transition-colors"
-                    style={{ height: `${heightValue}%` }}
-                  >
-                    <div
-                      className="absolute bottom-0 w-full bg-zinc-950 rounded-t-lg transition-all duration-500"
-                      style={{ height: `${heightValue}%` }}
-                    />
-                  </div>
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider shrink-0">{day.label}</span>
+          <div className="h-75 w-full flex items-end gap-2 justify-between px-4 pb-4">
+            {(statsData?.data?.chartData || [
+              { label: "Mon", value: 0, percentage: 0 },
+              { label: "Tue", value: 0, percentage: 0 },
+              { label: "Wed", value: 0, percentage: 0 },
+              { label: "Thu", value: 0, percentage: 0 },
+              { label: "Fri", value: 0, percentage: 0 },
+              { label: "Sat", value: 0, percentage: 0 },
+              { label: "Sun", value: 0, percentage: 0 }
+            ]).map((day, i) => (
+              <div key={i} className="w-full max-w-10 flex flex-col justify-end items-center gap-2 group relative">
+                <div className="absolute -top-8 bg-zinc-950 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  {day.value} Regs
                 </div>
-              );
-            })}
+                <div
+                  className="w-full bg-zinc-100 rounded-t-lg relative overflow-hidden group-hover:bg-zinc-200 transition-colors"
+                  style={{ height: `${Math.max(day.percentage, 5)}%` }} // Ensure at least 5% height so it is slightly visible even if 0
+                >
+                  <div
+                    className="absolute bottom-0 w-full bg-zinc-950 rounded-t-lg"
+                    style={{ height: `${day.percentage}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">{day.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -160,7 +149,7 @@ export default function AdminDashboard() {
             ) : !statsData?.data?.recentActivities || statsData.data.recentActivities.length === 0 ? (
               <div className="text-center py-10 text-xs text-zinc-400">No recent activities.</div>
             ) : (
-              statsData.data.recentActivities.map((activity: any) => {
+              statsData.data.recentActivities.map((activity) => {
                 const Icon = activity.type === "user" ? Users : Calendar;
                 return (
                   <div key={activity.id} className="relative flex items-start gap-4 group">

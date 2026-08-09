@@ -203,7 +203,7 @@ export default function EventManagementPage() {
           onClearFilters={clearFilters}
           filterContent={
             <>
-              <div className="space-y-1">
+              <div className="space-y-1 z-50">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Start Date</label>
                 <CustomSelect
                   value={timeframeFilter}

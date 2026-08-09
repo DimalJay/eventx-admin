@@ -20,12 +20,12 @@ export default function AnalyticsPage() {
   // Queries
   const { data: usersData, isLoading: isUsersLoading } = useQuery({
     queryKey: ["users"],
-    queryFn: getAllUsersRequest,
+    queryFn: () => getAllUsersRequest(),
   });
 
   const { data: eventsData, isLoading: isEventsLoading } = useQuery({
     queryKey: ["public-events"],
-    queryFn: getPublicEventsRequest,
+    queryFn: () => getPublicEventsRequest(),
   });
 
   const users = usersData?.data || [];
