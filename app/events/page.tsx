@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, XCircle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getPublicEventsRequest, getEventRegistrationsRequest } from "@/service/eventService";
 import { getAllUsersRequest } from "@/service/userService";
@@ -291,7 +291,6 @@ export default function EventManagementPage() {
                     <th className="px-6 py-4">Date</th>
                     <th className="px-6 py-4">Capacity</th>
                     <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
@@ -316,12 +315,6 @@ export default function EventManagementPage() {
                           }`}>
                             {status}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-1.5 text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-zinc-100" title="View"><Eye size={16}/></button>
-                            <button className="p-1.5 text-zinc-400 hover:text-red-600 rounded-lg hover:bg-red-50" title="Cancel"><XCircle size={16}/></button>
-                          </div>
                         </td>
                       </tr>
                     );
