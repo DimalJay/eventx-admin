@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Edit, Ban, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getAllUsersRequest, getUserRegistrationsRequest } from "@/service/userService";
+import { Edit, Ban, Loader2, Check, AlertCircle } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getAllUsersRequest, getUserRegistrationsRequest, updateUserStatusRequest } from "@/service/userService";
 import { getPublicEventsRequest } from "@/service/eventService";
 import CustomSelect from "@/components/CustomSelect";
 import TableCard from "@/components/admin/TableCard";
@@ -23,7 +24,32 @@ export default function UserManagementPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
+  // Confirmation modal states
+  const [confirmStatusChange, setConfirmStatusChange] = useState<{
+    userId: number;
+    userName: string;
+    currentStatus: string;
+  } | null>(null);
+
   const ITEMS_PER_PAGE = 10;
+
+  const queryClient = useQueryClient();
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ userId, currentStatus }: { userId: number; currentStatus: string }) => {
+      const newStatus = currentStatus === "active" ? "suspended" : "active";
+      return updateUserStatusRequest(userId, newStatus);
+    },
+    onSuccess: (data, variables) => {
+      const action = variables.currentStatus === "active" ? "suspended" : "activated";
+      toast.success(`User successfully ${action}.`);
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Failed to update user status.";
+      toast.error(errorMessage);
+    },
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
@@ -222,9 +248,38 @@ export default function UserManagementPage() {
                         </td>
                         <td className="px-6 py-4 text-zinc-500">{formatDate(user.createdAt)}</td>
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-1.5 text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-zinc-100"><Edit size={16}/></button>
-                            <button className="p-1.5 text-zinc-400 hover:text-amber-600 rounded-lg hover:bg-amber-50"><Ban size={16}/></button>
+                          <div className="flex items-center justify-end gap-2">
+                            {formattedStatus.toLowerCase() === "active" ? (
+                              <button
+                                onClick={() => {
+                                  setConfirmStatusChange({
+                                    userId: user.id,
+                                    userName: `${user.firstName} ${user.lastName}`,
+                                    currentStatus: user.accountStatus,
+                                  });
+                                }}
+                                disabled={toggleStatusMutation.isPending}
+                                className="p-1.5 text-zinc-400 hover:text-amber-600 rounded-lg hover:bg-amber-50"
+                                title="Suspend User"
+                              >
+                                <Ban size={16}/>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setConfirmStatusChange({
+                                    userId: user.id,
+                                    userName: `${user.firstName} ${user.lastName}`,
+                                    currentStatus: user.accountStatus,
+                                  });
+                                }}
+                                disabled={toggleStatusMutation.isPending}
+                                className="p-1.5 text-zinc-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50"
+                                title="Activate User"
+                              >
+                                <Check size={16}/>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -259,6 +314,55 @@ export default function UserManagementPage() {
         formatRole={formatRole}
         formatStatus={formatStatus}
       />
+
+      {confirmStatusChange && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-zinc-200/80 shadow-2xl w-full max-w-md overflow-hidden flex flex-col p-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-start gap-4">
+              <div className={`p-3 rounded-2xl ${confirmStatusChange.currentStatus === 'active' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                <AlertCircle size={24} />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <h3 className="font-semibold text-zinc-950 text-base leading-none">
+                  {confirmStatusChange.currentStatus === 'active' ? 'Suspend User Account' : 'Activate User Account'}
+                </h3>
+                <p className="text-zinc-500 text-sm leading-normal">
+                  Are you sure you want to {confirmStatusChange.currentStatus === 'active' ? 'suspend' : 'activate'} the account of <strong>{confirmStatusChange.userName}</strong>?
+                  {confirmStatusChange.currentStatus === 'active' 
+                    ? ' This will temporarily disable their access to the platform.' 
+                    : ' This will restore their access to the platform.'}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-zinc-100">
+              <button
+                onClick={() => setConfirmStatusChange(null)}
+                className="px-4 py-2 text-sm font-semibold text-zinc-500 hover:text-zinc-900 rounded-xl hover:bg-zinc-100 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toggleStatusMutation.mutate({ 
+                    userId: confirmStatusChange.userId, 
+                    currentStatus: confirmStatusChange.currentStatus 
+                  });
+                  setConfirmStatusChange(null);
+                }}
+                disabled={toggleStatusMutation.isPending}
+                className={`px-4 py-2 text-sm font-bold text-white rounded-xl shadow-sm transition-all cursor-pointer ${
+                  confirmStatusChange.currentStatus === 'active' 
+                    ? 'bg-amber-600 hover:bg-amber-700 active:bg-amber-800' 
+                    : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
+                }`}
+              >
+                {toggleStatusMutation.isPending ? 'Processing...' : confirmStatusChange.currentStatus === 'active' ? 'Yes, Suspend' : 'Yes, Activate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
