@@ -24,6 +24,16 @@ export default function UserManagementPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const search = params.get("search");
+      if (search) {
+        setSearchQuery(search);
+      }
+    }
+  }, []);
+
   // Confirmation modal states
   const [confirmStatusChange, setConfirmStatusChange] = useState<{
     userId: number;

@@ -246,17 +246,19 @@ export default function ActivitiesPage() {
             </div>
 
             {/* Action Link (Opens in new tab) */}
-            {selectedActivity.type === "event" && (
-              <a
-                href={`/events?search=${encodeURIComponent(selectedActivity.title.replace("New Event Created: ", ""))}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-zinc-950 hover:bg-zinc-900 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-xs transition-colors"
-              >
-                View Event Details
-                <ExternalLink size={12} />
-              </a>
-            )}
+            <a
+              href={
+                selectedActivity.type === "user"
+                  ? `/users?search=${encodeURIComponent(selectedActivity.email || selectedActivity.title.replace("New User Registered: ", ""))}`
+                  : `/events?search=${encodeURIComponent(selectedActivity.title.replace("New Event Created: ", ""))}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 bg-zinc-950 hover:bg-zinc-900 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-xs transition-colors"
+            >
+              {selectedActivity.type === "user" ? "View User Details" : "View Event Details"}
+              <ExternalLink size={12} />
+            </a>
           </div>
         </div>
       )}
