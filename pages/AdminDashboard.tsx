@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStatsRequest } from "@/service/dashboardService";
 import {
@@ -65,9 +66,9 @@ export default function AdminDashboard() {
           <button className="px-5 py-2.5 bg-white border border-zinc-200/80 text-zinc-700 rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-zinc-50 transition shadow-xs">
             Export Report
           </button>
-          <button className="px-5 py-2.5 bg-black text-white rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-black/90 transition shadow-xs">
+          <Link href="/analytics" className="px-5 py-2.5 bg-black text-white rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-black/90 transition shadow-xs">
             View Analytics
-          </button>
+          </Link>
         </div>
       </div>
 
