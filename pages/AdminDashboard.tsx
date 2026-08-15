@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStatsRequest } from "@/service/dashboardService";
@@ -10,10 +10,18 @@ import {
   Ticket,
   Activity,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Filter,
+  X,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("This Week");
+
   const { data: statsData, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: getDashboardStatsRequest,
@@ -101,11 +109,37 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 bg-white/80 backdrop-blur-md rounded-3xl border border-zinc-200/60 shadow-xs p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-zinc-950">Revenue & Registrations</h2>
-            <select className="bg-zinc-50 border border-zinc-200 text-zinc-700 text-sm rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-zinc-950/20">
-              <option>This Week</option>
-              <option>This Month</option>
-              <option>This Year</option>
-            </select>
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center justify-between gap-2 px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm text-zinc-700 hover:bg-zinc-100/50 transition font-medium min-w-28 text-left"
+              >
+                <span>{selectedFilter}</span>
+                {isDropdownOpen ? <ChevronUp size={14} className="text-zinc-500" /> : <ChevronDown size={14} className="text-zinc-500" />}
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-1 bg-white rounded-xl border border-zinc-200/80 shadow-md py-1 z-50 overflow-hidden min-w-28">
+                  {["This Week", "This Month", "This Year"].map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setSelectedFilter(option);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={cn(
+                        "w-full px-3 py-1.5 text-left text-xs transition-colors",
+                        selectedFilter === option 
+                          ? "bg-zinc-950 text-white font-medium" 
+                          : "text-zinc-600 hover:bg-zinc-50"
+                      )}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="h-75 w-full flex items-end gap-2 justify-between px-4 pb-4">
