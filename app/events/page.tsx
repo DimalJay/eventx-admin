@@ -25,6 +25,16 @@ export default function EventManagementPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const search = params.get("search");
+      if (search) {
+        setSearchQuery(search);
+      }
+    }
+  }, []);
+
   const ITEMS_PER_PAGE = 10;
 
   const { data: eventsData, isLoading: isEventsLoading, error: eventsError } = useQuery({

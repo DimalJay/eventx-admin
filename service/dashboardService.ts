@@ -55,6 +55,11 @@ export interface ActivityItem {
   time: string;
   timestamp: number;
   date: string;
+  email?: string | null;
+  accountStatus?: string;
+  description?: string | null;
+  location?: string | null;
+  ticketPrice?: number;
 }
 
 export interface AllActivitiesResponse {
