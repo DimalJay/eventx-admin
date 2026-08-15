@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Bell, Search, Menu, User } from "lucide-react";
+import { Bell, Menu, User } from "lucide-react";
 
 
 export function AdminHeader({ 
@@ -18,15 +18,6 @@ export function AdminHeader({
         >
           <Menu size={20} />
         </button>
-        
-        <div className="hidden md:flex items-center bg-zinc-100 rounded-full px-3 py-1.5 focus-within:ring-2 focus-within:ring-zinc-950/10 transition-all">
-          <Search size={16} className="text-zinc-400" />
-          <input 
-            type="text" 
-            placeholder="Search anything..." 
-            className="bg-transparent border-none outline-none text-sm px-2 w-64 text-zinc-700 placeholder-zinc-400"
-          />
-        </div>
       </div>
 
       <div className="flex items-center gap-3 md:gap-5">
