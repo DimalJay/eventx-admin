@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Edit, Ban, Loader2, X, User as UserIcon, Phone, Calendar, Shield, Globe, Award, CheckCircle2, AlertCircle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getAllUsersRequest, getUserRegistrationsRequest } from "@/service/userService";
+import { Edit, Ban, Loader2, Check, AlertCircle } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getAllUsersRequest, getUserRegistrationsRequest, updateUserStatusRequest } from "@/service/userService";
 import { getPublicEventsRequest } from "@/service/eventService";
 import CustomSelect from "@/components/CustomSelect";
-import { getImageUrl } from "@/lib/utils";
 import TableCard from "@/components/admin/TableCard";
 import TableToolbar from "@/components/admin/TableToolbar";
 import TablePagination from "@/components/admin/TablePagination";
@@ -24,7 +24,42 @@ export default function UserManagementPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const search = params.get("search");
+      if (search) {
+        setSearchQuery(search);
+      }
+    }
+  }, []);
+
+  // Confirmation modal states
+  const [confirmStatusChange, setConfirmStatusChange] = useState<{
+    userId: number;
+    userName: string;
+    currentStatus: string;
+  } | null>(null);
+
   const ITEMS_PER_PAGE = 10;
+
+  const queryClient = useQueryClient();
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ userId, currentStatus }: { userId: number; currentStatus: string }) => {
+      const newStatus = currentStatus === "active" ? "suspended" : "active";
+      return updateUserStatusRequest(userId, newStatus);
+    },
+    onSuccess: (data, variables) => {
+      const action = variables.currentStatus === "active" ? "suspended" : "activated";
+      toast.success(`User successfully ${action}.`);
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Failed to update user status.";
+      toast.error(errorMessage);
+    },
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
@@ -223,9 +258,38 @@ export default function UserManagementPage() {
                         </td>
                         <td className="px-6 py-4 text-zinc-500">{formatDate(user.createdAt)}</td>
                         <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-1.5 text-zinc-400 hover:text-zinc-900 rounded-lg hover:bg-zinc-100"><Edit size={16}/></button>
-                            <button className="p-1.5 text-zinc-400 hover:text-amber-600 rounded-lg hover:bg-amber-50"><Ban size={16}/></button>
+                          <div className="flex items-center justify-end gap-2">
+                            {formattedStatus.toLowerCase() === "active" ? (
+                              <button
+                                onClick={() => {
+                                  setConfirmStatusChange({
+                                    userId: user.id,
+                                    userName: `${user.firstName} ${user.lastName}`,
+                                    currentStatus: user.accountStatus,
+                                  });
+                                }}
+                                disabled={toggleStatusMutation.isPending}
+                                className="p-1.5 text-zinc-400 hover:text-amber-600 rounded-lg hover:bg-amber-50"
+                                title="Suspend User"
+                              >
+                                <Ban size={16}/>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setConfirmStatusChange({
+                                    userId: user.id,
+                                    userName: `${user.firstName} ${user.lastName}`,
+                                    currentStatus: user.accountStatus,
+                                  });
+                                }}
+                                disabled={toggleStatusMutation.isPending}
+                                className="p-1.5 text-zinc-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50"
+                                title="Activate User"
+                              >
+                                <Check size={16}/>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

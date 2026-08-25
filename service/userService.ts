@@ -31,3 +31,10 @@ export const getUserRegistrationsRequest = async (userId: number): Promise<any> 
     method: "GET",
   });
 };
+
+export const updateUserStatusRequest = async (userId: number, status: string): Promise<any> => {
+  return request(`/users/status`, {
+    method: "PUT",
+    data: { userId, status },
+  });
+};

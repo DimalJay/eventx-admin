@@ -2,7 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { logoutRequest } from "@/service/authService";
 import {
   LayoutDashboard,
   Users,
@@ -12,7 +14,8 @@ import {
   Settings,
   FileText,
   X,
-  LogOut
+  LogOut,
+  Activity
 } from "lucide-react";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
@@ -23,10 +26,10 @@ const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
   { name: "User Management", icon: Users, path: "/users" },
   { name: "Event Management", icon: CalendarDays, path: "/events" },
+  { name: "Recent Activities", icon: Activity, path: "/activities" },
   { name: "Complaints & Reports", icon: AlertOctagon, path: "/reports" },
   { name: "Analytics & Reports", icon: BarChart3, path: "/analytics" },
   { name: "System Settings", icon: Settings, path: "/settings" },
-  { name: "Audit Logs", icon: FileText, path: "/logs" },
 ];
 
 export function AdminSidebar({
