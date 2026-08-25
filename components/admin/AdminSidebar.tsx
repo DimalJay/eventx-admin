@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -12,13 +12,15 @@ import {
   AlertOctagon,
   BarChart3,
   Settings,
-  Menu,
+  FileText,
   X,
   LogOut,
   Activity
 } from "lucide-react";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { logoutRequest } from "@/service/authService";
 
 const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -43,10 +45,9 @@ export function AdminSidebar({
   const handleLogout = async () => {
     try {
       await logoutRequest();
-      toast.success("Logged out successfully");
       router.push("/login");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to log out");
+    } catch (err) {
+      console.error("Logout error:", err);
     }
   };
 
@@ -84,7 +85,7 @@ export function AdminSidebar({
             Main Menu
           </div>
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.path || (!!pathname && pathname.startsWith(item.path) && item.path !== "/");
+            const isActive = pathname ? (pathname === item.path || (pathname.startsWith(item.path) && item.path !== "/")) : false;
             const Icon = item.icon;
             return (
               <Link

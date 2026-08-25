@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, User as UserIcon, Phone, Calendar, Shield, Globe, Award, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { X, User as UserIcon, Calendar, Phone, Award, CheckCircle2, AlertCircle, Shield, Globe, Loader2 } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
 
 interface UserDetailsModalProps {
@@ -13,9 +13,9 @@ interface UserDetailsModalProps {
   rawEvents: any[];
   userRegistrations: any[];
   isUserRegsLoading: boolean;
-  formatDate: (dateString: string) => string;
-  formatRole: (role: string) => string;
+  formatDate: (date: string) => string;
   formatStatus: (status: string) => string;
+  formatRole: (role: string) => string;
 }
 
 export default function UserDetailsModal({
@@ -28,10 +28,12 @@ export default function UserDetailsModal({
   userRegistrations,
   isUserRegsLoading,
   formatDate,
-  formatRole,
   formatStatus,
+  formatRole,
 }: UserDetailsModalProps) {
   if (!isOpen || !selectedUser) return null;
+
+  const organizedEvents = rawEvents.filter((e: any) => e.organizerId === selectedUser.id);
 
   return (
     <>
@@ -48,9 +50,9 @@ export default function UserDetailsModal({
           {/* Modal Header */}
           <div className="p-6 pb-4 border-b border-zinc-100 flex items-start justify-between bg-zinc-50/50">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700 font-bold text-lg overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700 font-bold text-lg">
                 {selectedUser.profilePicture ? (
-                  <img src={getImageUrl(selectedUser.profilePicture)} alt="" className="w-full h-full object-cover" />
+                  <img src={getImageUrl(selectedUser.profilePicture)} alt="" className="w-full h-full rounded-full object-cover" />
                 ) : (
                   `${selectedUser.firstName[0]}${selectedUser.lastName[0]}`.toUpperCase()
                 )}
@@ -74,7 +76,7 @@ export default function UserDetailsModal({
           <div className="flex border-b border-zinc-100 px-6 bg-zinc-50/20">
             {[
               { id: "info", label: "General Info", icon: UserIcon },
-              { id: "organized", label: `Organized Events (${rawEvents.filter((e: any) => e.organizerId === selectedUser.id).length})`, icon: Calendar },
+              { id: "organized", label: `Organized Events (${organizedEvents.length})`, icon: Calendar },
               { id: "registered", label: `Registered Events (${userRegistrations.length})`, icon: Award },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -86,7 +88,7 @@ export default function UserDetailsModal({
                   className={`flex items-center gap-1.5 py-3 px-4 border-b-2 text-xs font-semibold tracking-wide uppercase transition-all cursor-pointer ${
                     isActive
                       ? "border-zinc-950 text-zinc-950 font-bold"
-                      : "border-transparent text-zinc-400 hover:text-zinc-600"
+                      : "border-transparent text-zinc-400 hover:text-zinc-650"
                   }`}
                 >
                   <Icon size={12} />
@@ -152,7 +154,7 @@ export default function UserDetailsModal({
                         <CheckCircle2 size={14} /> Verified
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-red-600 text-xs font-bold uppercase tracking-wider">
+                      <span className="flex items-center gap-1 text-red-655 text-xs font-bold uppercase tracking-wider">
                         <AlertCircle size={14} /> Unverified
                       </span>
                     )}
@@ -171,24 +173,22 @@ export default function UserDetailsModal({
 
             {activeTab === "organized" && (
               <div className="space-y-2">
-                {rawEvents.filter((e: any) => e.organizerId === selectedUser.id).length === 0 ? (
+                {organizedEvents.length === 0 ? (
                   <div className="text-center py-10 text-zinc-500">
                     <p className="text-sm font-medium">No events organized by this user.</p>
                   </div>
                 ) : (
-                  rawEvents
-                    .filter((e: any) => e.organizerId === selectedUser.id)
-                    .map((event: any) => (
-                      <div key={event.id} className="p-3.5 bg-zinc-50/60 border border-zinc-100 rounded-2xl flex items-center justify-between hover:bg-zinc-50 transition-colors">
-                        <div>
-                          <h4 className="text-sm font-semibold text-zinc-900">{event.title}</h4>
-                          <p className="text-xs text-zinc-500 mt-0.5">{formatDate(event.startDate)}</p>
-                        </div>
-                        <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 capitalize">
-                          {event.eventType}
-                        </span>
+                  organizedEvents.map((event: any) => (
+                    <div key={event.id} className="p-3.5 bg-zinc-50/60 border border-zinc-100 rounded-2xl flex items-center justify-between hover:bg-zinc-50 transition-colors">
+                      <div>
+                        <h4 className="text-sm font-semibold text-zinc-900">{event.title}</h4>
+                        <p className="text-xs text-zinc-500 mt-0.5">{formatDate(event.startDate)}</p>
                       </div>
-                    ))
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-700 capitalize">
+                        {event.eventType}
+                      </span>
+                    </div>
+                  ))
                 )}
               </div>
             )}

@@ -321,58 +321,9 @@ export default function UserManagementPage() {
         userRegistrations={userRegistrations}
         isUserRegsLoading={isUserRegsLoading}
         formatDate={formatDate}
-        formatRole={formatRole}
         formatStatus={formatStatus}
+        formatRole={formatRole}
       />
-
-      {confirmStatusChange && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-zinc-200/80 shadow-2xl w-full max-w-md overflow-hidden flex flex-col p-6 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-start gap-4">
-              <div className={`p-3 rounded-2xl ${confirmStatusChange.currentStatus === 'active' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                <AlertCircle size={24} />
-              </div>
-              <div className="space-y-1.5 flex-1">
-                <h3 className="font-semibold text-zinc-950 text-base leading-none">
-                  {confirmStatusChange.currentStatus === 'active' ? 'Suspend User Account' : 'Activate User Account'}
-                </h3>
-                <p className="text-zinc-500 text-sm leading-normal">
-                  Are you sure you want to {confirmStatusChange.currentStatus === 'active' ? 'suspend' : 'activate'} the account of <strong>{confirmStatusChange.userName}</strong>?
-                  {confirmStatusChange.currentStatus === 'active' 
-                    ? ' This will temporarily disable their access to the platform.' 
-                    : ' This will restore their access to the platform.'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-zinc-100">
-              <button
-                onClick={() => setConfirmStatusChange(null)}
-                className="px-4 py-2 text-sm font-semibold text-zinc-500 hover:text-zinc-900 rounded-xl hover:bg-zinc-100 transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  toggleStatusMutation.mutate({ 
-                    userId: confirmStatusChange.userId, 
-                    currentStatus: confirmStatusChange.currentStatus 
-                  });
-                  setConfirmStatusChange(null);
-                }}
-                disabled={toggleStatusMutation.isPending}
-                className={`px-4 py-2 text-sm font-bold text-white rounded-xl shadow-sm transition-all cursor-pointer ${
-                  confirmStatusChange.currentStatus === 'active' 
-                    ? 'bg-amber-600 hover:bg-amber-700 active:bg-amber-800' 
-                    : 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800'
-                }`}
-              >
-                {toggleStatusMutation.isPending ? 'Processing...' : confirmStatusChange.currentStatus === 'active' ? 'Yes, Suspend' : 'Yes, Activate'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
