@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { logoutRequest } from "@/service/authService";
 import {
   LayoutDashboard,
   Users,
@@ -11,21 +13,23 @@ import {
   BarChart3,
   Settings,
   FileText,
-  Menu,
   X,
-  LogOut
+  LogOut,
+  Activity
 } from "lucide-react";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { logoutRequest } from "@/service/authService";
 
 const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
   { name: "User Management", icon: Users, path: "/users" },
   { name: "Event Management", icon: CalendarDays, path: "/events" },
+  { name: "Recent Activities", icon: Activity, path: "/activities" },
   { name: "Complaints & Reports", icon: AlertOctagon, path: "/reports" },
   { name: "Analytics & Reports", icon: BarChart3, path: "/analytics" },
   { name: "System Settings", icon: Settings, path: "/settings" },
-  { name: "Audit Logs", icon: FileText, path: "/logs" },
 ];
 
 export function AdminSidebar({
@@ -36,6 +40,16 @@ export function AdminSidebar({
   setIsOpen: (val: boolean) => void
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   return (
     <>
@@ -94,7 +108,10 @@ export function AdminSidebar({
         </div>
 
         <div className="p-4 border-t border-zinc-900">
-          <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-sm font-medium">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-sm font-medium"
+          >
             <LogOut size={18} />
             <span>Logout</span>
           </button>

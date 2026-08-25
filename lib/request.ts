@@ -25,6 +25,7 @@ backend.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
+        localStorage.removeItem("adminLoggedIn");
         const currentPath = window.location.pathname;
         if (!currentPath.startsWith("/login")) {
           // Redirect to login or dispatch event

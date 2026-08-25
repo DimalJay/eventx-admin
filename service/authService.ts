@@ -2,7 +2,7 @@ import { request } from "@/lib/request";
 
 // login request
 export const loginRequest = async (data: any) => {
-  const res = await request("/auth/login", {
+  const res = await request("/auth/admin-login", {
     method: "POST",
     data: {
       email: data.email,
@@ -20,4 +20,15 @@ export const logoutRequest = async () => {
   });
   localStorage.removeItem("adminLoggedIn");
   return res;
+};
+
+// update password request
+export const updateAdminPasswordRequest = async (data: any) => {
+  return request("/admin/update-password", {
+    method: "POST",
+    data: {
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    },
+  });
 };
