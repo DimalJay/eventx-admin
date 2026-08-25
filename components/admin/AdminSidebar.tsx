@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -11,12 +11,13 @@ import {
   BarChart3,
   Settings,
   FileText,
-  Menu,
   X,
   LogOut
 } from "lucide-react";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { logoutRequest } from "@/service/authService";
 
 const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -36,6 +37,16 @@ export function AdminSidebar({
   setIsOpen: (val: boolean) => void
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   return (
     <>
@@ -71,7 +82,7 @@ export function AdminSidebar({
             Main Menu
           </div>
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.path || (pathname.startsWith(item.path) && item.path !== "/");
+            const isActive = pathname ? (pathname === item.path || (pathname.startsWith(item.path) && item.path !== "/")) : false;
             const Icon = item.icon;
             return (
               <Link
@@ -94,7 +105,10 @@ export function AdminSidebar({
         </div>
 
         <div className="p-4 border-t border-zinc-900">
-          <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-sm font-medium">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-sm font-medium"
+          >
             <LogOut size={18} />
             <span>Logout</span>
           </button>

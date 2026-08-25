@@ -2,7 +2,7 @@ import { request } from "@/lib/request";
 
 // login request
 export const loginRequest = async (data: any) => {
-  const res = await request("/auth/login", {
+  const res = await request("/auth/admin-login", {
     method: "POST",
     data: {
       email: data.email,
