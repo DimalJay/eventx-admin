@@ -3,11 +3,7 @@
 import React from "react";
 
 interface DailyRegistrationsChartProps {
-  chartData?: Array<{
-    percentage?: number;
-    label: string;
-    value: any;
-  }>;
+  chartData?: Array<any>;
 }
 
 export default function DailyRegistrationsChart({ chartData }: DailyRegistrationsChartProps) {

@@ -20,7 +20,6 @@ import {
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
 
-
 const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
   { name: "User Management", icon: Users, path: "/users" },
