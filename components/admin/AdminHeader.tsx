@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Bell, Menu, User } from "lucide-react";
+import { Menu, User } from "lucide-react";
 
 
 export function AdminHeader({ 
@@ -21,13 +21,6 @@ export function AdminHeader({
       </div>
 
       <div className="flex items-center gap-3 md:gap-5">
-        <button className="relative p-2 text-zinc-500 hover:bg-zinc-100 rounded-full transition-colors">
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-        </button>
-        
-        <div className="h-8 w-[1px] bg-zinc-200 hidden md:block" />
-        
         <div className="flex items-center gap-3 cursor-pointer p-1 pr-3 hover:bg-zinc-50 rounded-full transition-colors border border-transparent hover:border-zinc-200">
           <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white">
             <User size={16} />

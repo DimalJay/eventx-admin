@@ -14,6 +14,7 @@ export interface EventResponse {
     organizerId: number;
     coverImage: string | null;
     isPublic: boolean;
+    status: string | null;
     createdAt: string;
     updatedAt: string;
     capacity: number;
