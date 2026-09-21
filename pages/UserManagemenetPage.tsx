@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Edit, Ban, Loader2, Check, AlertCircle } from "lucide-react";
+import { Ban, Loader2, Check } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getAllUsersRequest, getUserRegistrationsRequest, updateUserStatusRequest } from "@/service/userService";
@@ -11,6 +11,7 @@ import TableCard from "@/components/admin/TableCard";
 import TableToolbar from "@/components/admin/TableToolbar";
 import TablePagination from "@/components/admin/TablePagination";
 import UserDetailsModal from "@/components/admin/UserDetailsModal";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 export default function UserManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -326,57 +327,39 @@ export default function UserManagementPage() {
       />
 
       {/* Confirmation Modal for Suspend/Activate User */}
-      {confirmStatusChange && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-100 space-y-4">
-            <div className="flex items-center gap-3 text-amber-600">
-              <div className="p-2.5 bg-amber-50 rounded-xl">
-                <AlertCircle size={22} />
-              </div>
-              <h3 className="text-lg font-bold text-zinc-900">
-                {confirmStatusChange.currentStatus === "active" ? "Suspend User Account" : "Activate User Account"}
-              </h3>
-            </div>
-            
-            <p className="text-sm text-zinc-600">
-              Are you sure you want to {confirmStatusChange.currentStatus === "active" ? "suspend" : "activate"} user{" "}
-              <strong className="text-zinc-900">{confirmStatusChange.userName}</strong>?
-            </p>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                onClick={() => setConfirmStatusChange(null)}
-                disabled={toggleStatusMutation.isPending}
-                className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  toggleStatusMutation.mutate(
-                    {
-                      userId: confirmStatusChange.userId,
-                      currentStatus: confirmStatusChange.currentStatus,
-                    },
-                    {
-                      onSettled: () => setConfirmStatusChange(null),
-                    }
-                  );
-                }}
-                disabled={toggleStatusMutation.isPending}
-                className={`px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors flex items-center gap-2 ${
-                  confirmStatusChange.currentStatus === "active"
-                    ? "bg-amber-600 hover:bg-amber-700"
-                    : "bg-emerald-600 hover:bg-emerald-700"
-                } disabled:opacity-50`}
-              >
-                {toggleStatusMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-                {confirmStatusChange.currentStatus === "active" ? "Suspend User" : "Activate User"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={!!confirmStatusChange}
+        tone={confirmStatusChange?.currentStatus === "active" ? "amber" : "emerald"}
+        title={
+          confirmStatusChange?.currentStatus === "active"
+            ? "Suspend User Account"
+            : "Activate User Account"
+        }
+        message={
+          <>
+            Are you sure you want to{" "}
+            {confirmStatusChange?.currentStatus === "active" ? "suspend" : "activate"} user{" "}
+            <strong className="text-zinc-900">{confirmStatusChange?.userName}</strong>?
+          </>
+        }
+        confirmLabel={
+          confirmStatusChange?.currentStatus === "active" ? "Suspend User" : "Activate User"
+        }
+        loading={toggleStatusMutation.isPending}
+        onCancel={() => setConfirmStatusChange(null)}
+        onConfirm={() => {
+          if (!confirmStatusChange) return;
+          toggleStatusMutation.mutate(
+            {
+              userId: confirmStatusChange.userId,
+              currentStatus: confirmStatusChange.currentStatus,
+            },
+            {
+              onSettled: () => setConfirmStatusChange(null),
+            }
+          );
+        }}
+      />
     </div>
   );
 }

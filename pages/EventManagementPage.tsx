@@ -7,13 +7,12 @@ import { toast } from "sonner";
 import { getPublicEventsRequest, getEventRegistrationsRequest, updateAdminEventStatusRequest } from "@/service/eventService";
 import { getAllUsersRequest } from "@/service/userService";
 import CustomSelect from "@/components/CustomSelect";
-import { getImageUrl } from "@/lib/utils";
 import TableCard from "@/components/admin/TableCard";
 import TableToolbar from "@/components/admin/TableToolbar";
 import TablePagination from "@/components/admin/TablePagination";
 import EventDetailsModal from "@/components/admin/EventDetailsModal";
 import EventsTable from "@/components/admin/EventsTable";
-import { AlertCircle } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 export default function EventManagementPage() {
   const queryClient = useQueryClient();
@@ -354,57 +353,39 @@ export default function EventManagementPage() {
       />
 
       {/* Confirmation Modal for Suspend/Activate Event */}
-      {confirmStatusChange && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-100 space-y-4">
-            <div className="flex items-center gap-3 text-amber-600">
-              <div className="p-2.5 bg-amber-50 rounded-xl">
-                <AlertCircle size={22} />
-              </div>
-              <h3 className="text-lg font-bold text-zinc-900">
-                {confirmStatusChange.currentStatus !== "Suspended" ? "Suspend Event" : "Activate Event"}
-              </h3>
-            </div>
-            
-            <p className="text-sm text-zinc-600">
-              Are you sure you want to {confirmStatusChange.currentStatus !== "Suspended" ? "suspend" : "activate"} event{" "}
-              <strong className="text-zinc-900">{confirmStatusChange.eventName}</strong>?
-            </p>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                onClick={() => setConfirmStatusChange(null)}
-                disabled={toggleStatusMutation.isPending}
-                className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  toggleStatusMutation.mutate(
-                    {
-                      eventId: confirmStatusChange.eventId,
-                      currentStatus: confirmStatusChange.currentStatus,
-                    },
-                    {
-                      onSettled: () => setConfirmStatusChange(null),
-                    }
-                  );
-                }}
-                disabled={toggleStatusMutation.isPending}
-                className={`px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors flex items-center gap-2 ${
-                  confirmStatusChange.currentStatus !== "Suspended"
-                    ? "bg-amber-600 hover:bg-amber-700"
-                    : "bg-emerald-600 hover:bg-emerald-700"
-                } disabled:opacity-50`}
-              >
-                {toggleStatusMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-                {confirmStatusChange.currentStatus !== "Suspended" ? "Suspend Event" : "Activate Event"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={!!confirmStatusChange}
+        tone={confirmStatusChange?.currentStatus !== "Suspended" ? "amber" : "emerald"}
+        title={
+          confirmStatusChange?.currentStatus !== "Suspended"
+            ? "Suspend Event"
+            : "Activate Event"
+        }
+        message={
+          <>
+            Are you sure you want to{" "}
+            {confirmStatusChange?.currentStatus !== "Suspended" ? "suspend" : "activate"} event{" "}
+            <strong className="text-zinc-900">{confirmStatusChange?.eventName}</strong>?
+          </>
+        }
+        confirmLabel={
+          confirmStatusChange?.currentStatus !== "Suspended" ? "Suspend Event" : "Activate Event"
+        }
+        loading={toggleStatusMutation.isPending}
+        onCancel={() => setConfirmStatusChange(null)}
+        onConfirm={() => {
+          if (!confirmStatusChange) return;
+          toggleStatusMutation.mutate(
+            {
+              eventId: confirmStatusChange.eventId,
+              currentStatus: confirmStatusChange.currentStatus,
+            },
+            {
+              onSettled: () => setConfirmStatusChange(null),
+            }
+          );
+        }}
+      />
     </div>
   );
 }

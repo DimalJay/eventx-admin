@@ -1,15 +1,30 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Search, Filter } from "lucide-react";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
-const REPORTS = [
+const INITIAL_REPORTS = [
   { id: "R001", reporter: "user@uni.edu", type: "Harassment", status: "New", priority: "High", date: "2026-07-16" },
   { id: "R002", reporter: "kasun@uni.edu", type: "Fake Event", status: "Under Review", priority: "Medium", date: "2026-07-15" },
   { id: "R003", reporter: "admin@uni.edu", type: "Spam", status: "Resolved", priority: "Low", date: "2026-07-10" },
 ];
 
 export default function ReportsPage() {
+  const [reports, setReports] = useState(INITIAL_REPORTS);
+  const [reviewTarget, setReviewTarget] = useState<typeof INITIAL_REPORTS[number] | null>(null);
+
+  const handleResolve = () => {
+    if (!reviewTarget) return;
+    setReports((prev) =>
+      prev.map((report) =>
+        report.id === reviewTarget.id ? { ...report, status: "Resolved" } : report
+      )
+    );
+    toast.success(`Report ${reviewTarget.id} marked as resolved.`);
+    setReviewTarget(null);
+  };
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -51,13 +66,16 @@ export default function ReportsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {REPORTS.map((report) => (
+              {reports.map((report) => (
                 <tr key={report.id} className="hover:bg-zinc-50/50 transition-colors group">
                   <td className="px-6 py-4 font-medium text-zinc-900">{report.id}</td>
                   <td className="px-6 py-4 text-zinc-500">{report.reporter}</td>
                   <td className="px-6 py-4 text-zinc-700">{report.type}</td>
                   <td className="px-6 py-4">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-700">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      report.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700' :
+                      report.status === 'Under Review' ? 'bg-amber-50 text-amber-700' : 'bg-zinc-100 text-zinc-700'
+                    }`}>
                       {report.status}
                     </span>
                   </td>
@@ -70,7 +88,13 @@ export default function ReportsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button className="px-4 py-1.5 bg-zinc-900 text-white rounded-full text-xs font-semibold hover:bg-zinc-800 transition">Review</button>
+                    <button
+                      onClick={() => setReviewTarget(report)}
+                      disabled={report.status === "Resolved"}
+                      className="px-4 py-1.5 bg-zinc-900 text-white rounded-full text-xs font-semibold hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Review
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -78,6 +102,22 @@ export default function ReportsPage() {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!reviewTarget}
+        tone="emerald"
+        title="Resolve Complaint Report"
+        message={
+          <>
+            Mark report <strong className="text-zinc-900">{reviewTarget?.id}</strong> (
+            {reviewTarget?.type}) as resolved? This will close the complaint raised by{" "}
+            <strong className="text-zinc-900">{reviewTarget?.reporter}</strong>.
+          </>
+        }
+        confirmLabel="Mark Resolved"
+        onCancel={() => setReviewTarget(null)}
+        onConfirm={handleResolve}
+      />
     </div>
   );
 }
