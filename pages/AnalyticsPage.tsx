@@ -41,10 +41,6 @@ export default function AnalyticsPage() {
   const users = usersData?.data || [];
   const events = eventsData?.data || [];
 
-  // Debugging logs to verify backend data in Browser Console
-  console.log("AnalyticsPage - Stats Data:", stats);
-  console.log("AnalyticsPage - Events Data:", events);
-
   // Generate Report logic
   const handleGenerateReport = () => {
     const now = new Date();
