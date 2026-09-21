@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getPublicEventsRequest, getEventRegistrationsRequest } from "@/service/eventService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getPublicEventsRequest, getEventRegistrationsRequest, updateAdminEventStatusRequest } from "@/service/eventService";
 import { getAllUsersRequest } from "@/service/userService";
 import CustomSelect from "@/components/CustomSelect";
 import { getImageUrl } from "@/lib/utils";
@@ -12,8 +13,10 @@ import TableToolbar from "@/components/admin/TableToolbar";
 import TablePagination from "@/components/admin/TablePagination";
 import EventDetailsModal from "@/components/admin/EventDetailsModal";
 import EventsTable from "@/components/admin/EventsTable";
+import { AlertCircle } from "lucide-react";
 
 export default function EventManagementPage() {
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [timeframeFilter, setTimeframeFilter] = useState("all");
@@ -26,7 +29,30 @@ export default function EventManagementPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
+  // Confirmation modal states
+  const [confirmStatusChange, setConfirmStatusChange] = useState<{
+    eventId: number;
+    eventName: string;
+    currentStatus: string;
+  } | null>(null);
+
   const ITEMS_PER_PAGE = 10;
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ eventId, currentStatus }: { eventId: number; currentStatus: string }) => {
+      const newStatus = currentStatus === "Suspended" ? "active" : "suspended";
+      return updateAdminEventStatusRequest(eventId, newStatus);
+    },
+    onSuccess: (data, variables) => {
+      const action = variables.currentStatus === "Suspended" ? "activated" : "suspended";
+      toast.success(`Event successfully ${action}.`);
+      queryClient.invalidateQueries({ queryKey: ["public-events"] });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Failed to update event status.";
+      toast.error(errorMessage);
+    },
+  });
 
   const { data: eventsData, isLoading: isEventsLoading, error: eventsError } = useQuery({
     queryKey: ["public-events"],
@@ -68,6 +94,10 @@ export default function EventManagementPage() {
 
   // Helper to determine status based on dates
   const getEventStatus = (event: typeof rawEvents[0]) => {
+    if (event.status && event.status.toLowerCase() === 'suspended') {
+      return "Suspended";
+    }
+
     const now = new Date();
     const start = new Date(event.startDate);
     const end = new Date(event.endDate);
@@ -289,6 +319,13 @@ export default function EventManagementPage() {
               getOrganizerName={getOrganizerName}
               formatDate={formatDate}
               getEventStatus={getEventStatus}
+              onStatusToggle={(event) => {
+                setConfirmStatusChange({
+                  eventId: event.id,
+                  eventName: event.title,
+                  currentStatus: getEventStatus(event),
+                });
+              }}
             />
 
             <TablePagination
@@ -315,6 +352,59 @@ export default function EventManagementPage() {
         attendees={eventAttendees}
         isAttendeesLoading={isEventRegsLoading}
       />
+
+      {/* Confirmation Modal for Suspend/Activate Event */}
+      {confirmStatusChange && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-100 space-y-4">
+            <div className="flex items-center gap-3 text-amber-600">
+              <div className="p-2.5 bg-amber-50 rounded-xl">
+                <AlertCircle size={22} />
+              </div>
+              <h3 className="text-lg font-bold text-zinc-900">
+                {confirmStatusChange.currentStatus !== "Suspended" ? "Suspend Event" : "Activate Event"}
+              </h3>
+            </div>
+            
+            <p className="text-sm text-zinc-600">
+              Are you sure you want to {confirmStatusChange.currentStatus !== "Suspended" ? "suspend" : "activate"} event{" "}
+              <strong className="text-zinc-900">{confirmStatusChange.eventName}</strong>?
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setConfirmStatusChange(null)}
+                disabled={toggleStatusMutation.isPending}
+                className="px-4 py-2 text-sm font-semibold text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toggleStatusMutation.mutate(
+                    {
+                      eventId: confirmStatusChange.eventId,
+                      currentStatus: confirmStatusChange.currentStatus,
+                    },
+                    {
+                      onSettled: () => setConfirmStatusChange(null),
+                    }
+                  );
+                }}
+                disabled={toggleStatusMutation.isPending}
+                className={`px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors flex items-center gap-2 ${
+                  confirmStatusChange.currentStatus !== "Suspended"
+                    ? "bg-amber-600 hover:bg-amber-700"
+                    : "bg-emerald-600 hover:bg-emerald-700"
+                } disabled:opacity-50`}
+              >
+                {toggleStatusMutation.isPending && <Loader2 size={16} className="animate-spin" />}
+                {confirmStatusChange.currentStatus !== "Suspended" ? "Suspend Event" : "Activate Event"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

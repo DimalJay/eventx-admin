@@ -50,4 +50,11 @@ export const getAdminEventRegistrationCountsRequest = async (): Promise<any> => 
   });
 };
 
+export const updateAdminEventStatusRequest = async (eventId: number, status: string): Promise<any> => {
+  return request(`/admin/event-status`, {
+    method: "PUT",
+    data: { eventId, status },
+  });
+};
+
 

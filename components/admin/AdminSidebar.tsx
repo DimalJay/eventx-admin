@@ -25,7 +25,6 @@ const MENU_ITEMS = [
   { name: "User Management", icon: Users, path: "/users" },
   { name: "Event Management", icon: CalendarDays, path: "/events" },
   { name: "Recent Activities", icon: Activity, path: "/activities" },
-  { name: "Complaints & Reports", icon: AlertOctagon, path: "/reports" },
   { name: "Analytics & Reports", icon: BarChart3, path: "/analytics" },
   { name: "System Settings", icon: Settings, path: "/settings" },
 ];
