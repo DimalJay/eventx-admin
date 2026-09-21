@@ -31,7 +31,23 @@ export const getPublicEventsRequest = async (): Promise<EventResponse> => {
 };
 
 export const getEventRegistrationsRequest = async (eventId: number): Promise<any> => {
-  return request(`/event/registrations?eventId=${eventId}`, {
+  try {
+    return await request(`/event/registrations?eventId=${eventId}`, {
+      method: "GET",
+    });
+  } catch (error: any) {
+    // Graceful fallback if Admin does not have organizer permissions for this event
+    console.warn(`Skipping registrations for event ${eventId} (Access Denied/403)`);
+    return { data: [] };
+  }
+};
+
+// Admin-level endpoint: returns all events' registration counts in one call
+// Shape: { success: true, data: [{ eventId: number, count: number }] }
+export const getAdminEventRegistrationCountsRequest = async (): Promise<any> => {
+  return request("/admin/event-registration-counts", {
     method: "GET",
   });
 };
+
+
