@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import ProfileSettingsForm from "@/components/admin/ProfileSettingsForm";
 import SecuritySettingsForm from "@/components/admin/SecuritySettingsForm";
+import { updateAdminPasswordRequest } from "@/service/authService";
+import { useAdminProfile } from "@/providers/AdminProfileProvider";
 
 type TabType = "profile" | "security";
 
@@ -19,11 +21,11 @@ export default function SettingsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Profile State
+  const { profile: adminProfile, updateProfile } = useAdminProfile();
   const [profile, setProfile] = useState({
-    name: "System Admin",
-    email: "admin@eventx.com",
-    role: "Super Admin",
-    phone: "+94 77 123 4567"
+    name: adminProfile.name,
+    role: adminProfile.role,
+    phone: adminProfile.phone
   });
 
   // Password State
@@ -33,26 +35,53 @@ export default function SettingsPage() {
     confirm: ""
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMessage(null);
 
-    // Simulate API request saving settings
-    setTimeout(() => {
-      setLoading(false);
-      setSuccessMessage("Settings updated successfully!");
-      
-      // Clear password fields on successful save
-      if (activeTab === "security") {
-        setPasswords({ current: "", new: "", confirm: "" });
+    if (activeTab === "security") {
+      if (passwords.new !== passwords.confirm) {
+        alert("New passwords do not match!");
+        setLoading(false);
+        return;
       }
-
-      // Hide success message after 3 seconds
+      try {
+        const res = await updateAdminPasswordRequest({
+          currentPassword: passwords.current,
+          newPassword: passwords.new
+        });
+        
+        if (res.success) {
+          setSuccessMessage("Password updated successfully!");
+          setPasswords({ current: "", new: "", confirm: "" });
+        } else {
+          alert(res.message || "Failed to update password.");
+        }
+      } catch (err) {
+        alert(
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+            "Failed to update password."
+        );
+      } finally {
+        setLoading(false);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
+      }
+    } else {
+      // Simulate API request saving profile settings
+      updateProfile({ name: profile.name, role: profile.role, phone: profile.phone });
       setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-    }, 1200);
+        setLoading(false);
+        setSuccessMessage("Settings updated successfully!");
+
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
+      }, 1200);
+    }
   };
 
   const tabs = [
