@@ -19,8 +19,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/widgets/Logo";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { logoutRequest } from "@/service/authService";
+
 
 const MENU_ITEMS = [
   { name: "Dashboard", icon: LayoutDashboard, path: "/" },
