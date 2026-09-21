@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Menu, User } from "lucide-react";
+import { useAdminProfile } from "@/providers/AdminProfileProvider";
 
 
 export function AdminHeader({ 
@@ -9,6 +10,8 @@ export function AdminHeader({
 }: { 
   setSidebarOpen: (val: boolean) => void 
 }) {
+  const { profile } = useAdminProfile();
+
   return (
     <header className="h-16 bg-white/80 backdrop-blur-md border-b border-zinc-200/80 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
       <div className="flex items-center gap-4">
@@ -26,8 +29,8 @@ export function AdminHeader({
             <User size={16} />
           </div>
           <div className="hidden md:flex flex-col">
-            <span className="text-sm font-medium text-zinc-700 leading-none">System Admin</span>
-            <span className="text-xs text-zinc-500 mt-0.5">Super Admin</span>
+            <span className="text-sm font-medium text-zinc-700 leading-none">{profile.name}</span>
+            <span className="text-xs text-zinc-500 mt-0.5">{profile.role}</span>
           </div>
         </div>
       </div>

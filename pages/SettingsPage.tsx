@@ -5,25 +5,26 @@ import {
   User, 
   Lock, 
   Save, 
-  Check, 
   Loader2 
 } from "lucide-react";
 import ProfileSettingsForm from "@/components/admin/ProfileSettingsForm";
 import SecuritySettingsForm from "@/components/admin/SecuritySettingsForm";
+import { updateAdminPasswordRequest } from "@/service/authService";
+import { useAdminProfile } from "@/providers/AdminProfileProvider";
+import { toast } from "sonner";
 
 type TabType = "profile" | "security";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Profile State
+  const { profile: adminProfile, updateProfile } = useAdminProfile();
   const [profile, setProfile] = useState({
-    name: "System Admin",
-    email: "admin@eventx.com",
-    role: "Super Admin",
-    phone: "+94 77 123 4567"
+    name: adminProfile.name,
+    role: adminProfile.role,
+    phone: adminProfile.phone
   });
 
   // Password State
@@ -33,26 +34,44 @@ export default function SettingsPage() {
     confirm: ""
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setSuccessMessage(null);
 
-    // Simulate API request saving settings
-    setTimeout(() => {
-      setLoading(false);
-      setSuccessMessage("Settings updated successfully!");
-      
-      // Clear password fields on successful save
-      if (activeTab === "security") {
-        setPasswords({ current: "", new: "", confirm: "" });
+    if (activeTab === "security") {
+      if (passwords.new !== passwords.confirm) {
+        toast.error("New passwords do not match!");
+        setLoading(false);
+        return;
       }
-
-      // Hide success message after 3 seconds
+      try {
+        const res = await updateAdminPasswordRequest({
+          currentPassword: passwords.current,
+          newPassword: passwords.new
+        });
+        
+        if (res.success) {
+          toast.success("Password updated successfully!");
+          setPasswords({ current: "", new: "", confirm: "" });
+        } else {
+          toast.error(res.message || "Failed to update password.");
+        }
+      } catch (err) {
+        toast.error(
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+            "Failed to update password."
+        );
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Simulate API request saving profile settings
+      updateProfile({ name: profile.name, role: profile.role, phone: profile.phone });
       setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-    }, 1200);
+        setLoading(false);
+        toast.success("Profile settings updated successfully!");
+      }, 1200);
+    }
   };
 
   const tabs = [
@@ -70,16 +89,6 @@ export default function SettingsPage() {
             Manage your personal profile and account security settings.
           </p>
         </div>
-
-        {/* Global Save Indicator */}
-        {successMessage && (
-          <div
-            className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider"
-          >
-            <Check size={14} />
-            {successMessage}
-          </div>
-        )}
       </div>
 
       {/* Horizontal Tabs Navigation */}
@@ -90,10 +99,7 @@ export default function SettingsPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setSuccessMessage(null);
-              }}
+              onClick={() => setActiveTab(tab.id)}
               data-selected={isActive}
               className="tab-item flex items-center gap-2 pb-3 text-sm font-semibold border-zinc-950 cursor-pointer transition-all duration-200 relative"
             >

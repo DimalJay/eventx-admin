@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { AdminProfileProvider } from "@/providers/AdminProfileProvider";
 
 export default function RootLayout({
   children,
@@ -45,7 +46,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col overflow-x-hidden">
         <QueryProvider>
-          <AdminLayoutWrapper>{children}</AdminLayoutWrapper>
+          <AdminProfileProvider>
+            <AdminLayoutWrapper>{children}</AdminLayoutWrapper>
+          </AdminProfileProvider>
           <Toaster position="top-center" richColors />
         </QueryProvider>
       </body>

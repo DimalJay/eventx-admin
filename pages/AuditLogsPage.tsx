@@ -2,15 +2,20 @@
 
 import React from "react";
 import { Search, Filter } from "lucide-react";
+import { useAdminProfile } from "@/providers/AdminProfileProvider";
 
 const LOGS = [
-  { id: "L001", admin: "System Admin (super)", action: "User Ban", entity: "U005 (John Doe)", time: "2026-07-17 14:30:22", status: "Success", ip: "192.168.1.5" },
-  { id: "L002", admin: "System Admin (super)", action: "Settings Update", entity: "Session Timeout", time: "2026-07-17 12:15:00", status: "Success", ip: "192.168.1.5" },
+  { id: "L001", admin: "self", action: "User Ban", entity: "U005 (John Doe)", time: "2026-07-17 14:30:22", status: "Success", ip: "192.168.1.5" },
+  { id: "L002", admin: "self", action: "Settings Update", entity: "Session Timeout", time: "2026-07-17 12:15:00", status: "Success", ip: "192.168.1.5" },
   { id: "L003", admin: "Moderator_A", action: "Event Cancel", entity: "E005 (Music Night)", time: "2026-07-16 09:45:11", status: "Success", ip: "10.0.0.12" },
   { id: "L004", admin: "Moderator_B", action: "User Edit", entity: "U002 (Kasun Silva)", time: "2026-07-15 16:20:05", status: "Failed", ip: "10.0.0.18" },
 ];
 
 export default function AuditLogsPage() {
+  const { profile } = useAdminProfile();
+  const resolvedLogs = LOGS.map((log) =>
+    log.admin === "self" ? { ...log, admin: `${profile.name}` } : log
+  );
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -52,7 +57,7 @@ export default function AuditLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 font-mono text-xs">
-              {LOGS.map((log) => (
+              {resolvedLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-zinc-50/50 transition-colors group">
                   <td className="px-6 py-4 text-zinc-500">{log.time}</td>
                   <td className="px-6 py-4 font-medium text-zinc-900">{log.admin}</td>

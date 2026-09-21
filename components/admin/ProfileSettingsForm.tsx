@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
+import { useAdminProfile } from "@/providers/AdminProfileProvider";
 
 interface ProfileData {
   name: string;
-  email: string;
   role: string;
   phone: string;
 }
@@ -15,11 +15,16 @@ interface ProfileSettingsFormProps {
 }
 
 export default function ProfileSettingsForm({ profile, onProfileChange }: ProfileSettingsFormProps) {
+  const { updateProfile } = useAdminProfile();
+
   const handleChange = (field: keyof ProfileData, value: string) => {
     onProfileChange({
       ...profile,
       [field]: value,
     });
+    if (field === "name") {
+      updateProfile({ name: value });
+    }
   };
 
   return (
@@ -43,16 +48,6 @@ export default function ProfileSettingsForm({ profile, onProfileChange }: Profil
             type="text" 
             value={profile.name} 
             onChange={(e) => handleChange("name", e.target.value)}
-            className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all" 
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Admin Email</label>
-          <input 
-            type="email" 
-            value={profile.email} 
-            onChange={(e) => handleChange("email", e.target.value)}
             className="w-full bg-zinc-50/50 border border-zinc-200 text-zinc-800 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:border-zinc-900 focus:outline-none transition-all" 
             required
           />
